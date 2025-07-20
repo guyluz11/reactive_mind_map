@@ -1648,6 +1648,8 @@ class _MindMapWidgetState extends State<MindMapWidget>
   /// 개별 노드 위젯 빌드 / Build individual node widget
   Widget _buildNodeWidget(MindMapNode node) {
     final isSelected = _selectedNodeId == node.id;
+    final isFocused =
+        widget.focusNodeId != null && widget.focusNodeId == node.id;
 
     final actualSize = widget.style.getActualNodeSize(
       node.title,
@@ -1748,7 +1750,11 @@ class _MindMapWidgetState extends State<MindMapWidget>
     final textColor = node.textColor ?? widget.style.defaultTextStyle.color;
     final borderColor =
         node.borderColor ??
-        (isSelected ? widget.style.selectionBorderColor : Colors.white);
+        ((isFocused || isSelected)
+            ? widget.style.selectionBorderColor
+            : Colors.white);
+    final borderWidth =
+        (isFocused || isSelected) ? widget.style.selectionBorderWidth : 2.0;
 
     return Positioned(
       key: ValueKey('positioned_${node.id}'),
@@ -1786,8 +1792,7 @@ class _MindMapWidgetState extends State<MindMapWidget>
                 shape: widget.style.nodeShape,
                 fillColor: nodeColor,
                 borderColor: borderColor,
-                borderWidth:
-                    isSelected ? widget.style.selectionBorderWidth : 2.0,
+                borderWidth: borderWidth,
                 shadowEnabled: widget.style.enableNodeShadow,
                 shadowColor: widget.style.nodeShadowColor,
                 shadowBlurRadius: widget.style.nodeShadowBlurRadius,

@@ -1746,7 +1746,10 @@ class MindMapWidgetState extends State<MindMapWidget>
 
     // 기본 노드 빌더 사용
     final textSize = widget.style.getTextSize(node.level);
-    final nodeColor = node.color;
+    final nodeColor =
+        (isSelected && widget.style.selectedColor != null)
+            ? widget.style.selectedColor
+            : node.color;
     final textColor = node.textColor ?? widget.style.defaultTextStyle.color;
     final borderColor =
         (isFocused || isSelected)
@@ -1789,7 +1792,7 @@ class MindMapWidgetState extends State<MindMapWidget>
             child: CustomPaint(
               painter: _NodeWidgetPainter(
                 shape: widget.style.nodeShape,
-                fillColor: nodeColor,
+                fillColor: nodeColor ?? Colors.blue,
                 borderColor: borderColor,
                 borderWidth: borderWidth,
                 shadowEnabled: widget.style.enableNodeShadow,

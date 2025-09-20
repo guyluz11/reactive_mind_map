@@ -55,6 +55,9 @@ class MindMapStyle {
   /// 노드 선택 시 테두리 두께 / Border thickness when node is selected
   final double selectionBorderWidth;
 
+  /// 노드 선택 시 색상 / Color when node is selected
+  final Color? selectedColor;
+
   /// 노드 애니메이션 지속 시간 / Node animation duration
   final Duration animationDuration;
 
@@ -150,6 +153,7 @@ class MindMapStyle {
     this.leafNodeSize = 45.0,
     this.selectionBorderColor = Colors.yellow,
     this.selectionBorderWidth = 3.0,
+    this.selectedColor,
     this.animationDuration = const Duration(milliseconds: 500),
     this.animationCurve = Curves.easeOutCubic,
     this.enableNodeShadow = true,
@@ -188,6 +192,7 @@ class MindMapStyle {
     double? leafNodeSize,
     Color? selectionBorderColor,
     double? selectionBorderWidth,
+    Color? selectedColor,
     Duration? animationDuration,
     Curve? animationCurve,
     bool? enableNodeShadow,
@@ -231,6 +236,7 @@ class MindMapStyle {
       leafNodeSize: leafNodeSize ?? this.leafNodeSize,
       selectionBorderColor: selectionBorderColor ?? this.selectionBorderColor,
       selectionBorderWidth: selectionBorderWidth ?? this.selectionBorderWidth,
+      selectedColor: selectedColor ?? this.selectedColor,
       animationDuration: animationDuration ?? this.animationDuration,
       animationCurve: animationCurve ?? this.animationCurve,
       enableNodeShadow: enableNodeShadow ?? this.enableNodeShadow,

@@ -1747,7 +1747,7 @@ class MindMapWidgetState extends State<MindMapWidget>
     // 기본 노드 빌더 사용
     final textSize = widget.style.getTextSize(node.level);
     final nodeColor =
-        (isSelected && widget.style.selectedColor != null)
+        (isFocused || isSelected && widget.style.selectedColor != null)
             ? widget.style.selectedColor
             : node.color;
     final textColor = node.textColor ?? widget.style.defaultTextStyle.color;

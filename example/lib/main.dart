@@ -32,28 +32,34 @@ class _TestScreenState extends State<TestScreen> {
   NodeExpandCameraBehavior expandBehavior = NodeExpandCameraBehavior.none;
 
   // 간단한 테스트 데이터
-  final mindMapData = MindMapData(
-    id: 'root',
-    title: '🎯 메인',
-    children: [
-      MindMapData(
-        id: 'node1',
-        title: '📝 노드1',
-        borderColor: Colors.green,
-        children: [
-          MindMapData(id: 'sub1', title: '서브1', borderColor: Colors.purple),
-          MindMapData(id: 'sub2', title: '서브2'),
-        ],
-      ),
-      MindMapData(id: 'node2', title: '🎨 노드2'),
-      MindMapData(id: 'node3', title: '🔧 노드3'),
-      MindMapData(
-        id: 'node4',
-        title: '🚀 노드4',
-        children: [MindMapData(id: 'final', title: '마지막')],
-      ),
-    ],
-  );
+  late MindMapData mindMapData;
+
+  @override
+  void initState() {
+    super.initState();
+    mindMapData = MindMapData(
+      id: 'root',
+      title: '🎯 메인',
+      children: [
+        MindMapData(
+          id: 'node1',
+          title: '📝 노드1',
+          borderColor: Colors.green,
+          children: [
+            MindMapData(id: 'sub1', title: '서브1', borderColor: Colors.purple),
+            MindMapData(id: 'sub2', title: '서브2'),
+          ],
+        ),
+        MindMapData(id: 'node2', title: '🎨 노드2'),
+        MindMapData(id: 'node3', title: '🔧 노드3'),
+        MindMapData(
+          id: 'node4',
+          title: '🚀 노드4',
+          children: [MindMapData(id: 'final', title: '마지막')],
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -166,6 +172,7 @@ class _TestScreenState extends State<TestScreen> {
                   data: mindMapData,
                   style: const MindMapStyle(
                     backgroundColor: Color(0xFFF8F9FA),
+                    selectedColor: Colors.red,
                     defaultNodeColors: [
                       Color(0xFF4CAF50),
                       Color(0xFF2196F3),
@@ -268,6 +275,11 @@ class _TestScreenState extends State<TestScreen> {
     int nextIdx = (currentIdx + 1) % flatNodes.length;
     final nextNode = flatNodes[nextIdx];
     setState(() {
+      mindMapData = MindMapData.updateNodeInTree(
+        mindMapData,
+        nextNode.id,
+        (node) => node.copyWith(color: Colors.blue),
+      );
       currentFocus = CameraFocus.custom;
       targetNodeId = nextNode.id;
       lastAction = '다음 노드로 이동: ${nextNode.title}';

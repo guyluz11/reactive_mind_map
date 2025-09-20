@@ -126,4 +126,27 @@ class MindMapData {
     }
     return result;
   }
+
+  /// Recursively update a node in the tree.
+  static MindMapData updateNodeInTree(MindMapData root, String nodeId, MindMapData Function(MindMapData) updater) {
+    if (root.id == nodeId) {
+      return updater(root);
+    }
+
+    List<MindMapData> newChildren = [];
+    bool wasUpdated = false;
+    for (final child in root.children) {
+      final updatedChild = updateNodeInTree(child, nodeId, updater);
+      if (updatedChild != child) {
+        wasUpdated = true;
+      }
+      newChildren.add(updatedChild);
+    }
+
+    if (wasUpdated) {
+      return root.copyWith(children: newChildren);
+    }
+
+    return root;
+  }
 }

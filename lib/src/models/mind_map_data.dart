@@ -11,6 +11,9 @@ class MindMapData {
   /// Align text
   final TextAlign textAlign;
 
+  /// The direction to use for the text in each node, defualt to TextDirection.ltr
+  final TextDirection textDirection;
+
   /// 노드의 상세 설명
   final String description;
 
@@ -43,6 +46,7 @@ class MindMapData {
     this.color,
     this.textColor,
     this.textAlign = TextAlign.center,
+    this.textDirection = TextDirection.ltr,
     this.borderColor,
     this.textStyle,
     this.size,
@@ -58,6 +62,7 @@ class MindMapData {
     Color? color,
     Color? textColor,
     TextAlign? textAlign,
+    TextDirection? textDirection,
     Color? borderColor,
     TextStyle? textStyle,
     Size? size,
@@ -71,6 +76,7 @@ class MindMapData {
       color: color ?? this.color,
       textColor: textColor ?? this.textColor,
       textAlign: textAlign ?? this.textAlign,
+      textDirection: textDirection ?? this.textDirection,
       borderColor: borderColor ?? this.borderColor,
       textStyle: textStyle ?? this.textStyle,
       size: size ?? this.size,
@@ -90,6 +96,7 @@ class MindMapData {
         other.color == color &&
         other.textColor == textColor &&
         other.textAlign == textAlign &&
+        other.textDirection == textDirection &&
         other.borderColor == borderColor &&
         other.textStyle == textStyle &&
         other.size == size &&
@@ -106,6 +113,7 @@ class MindMapData {
       color,
       textColor,
       textAlign,
+      textDirection,
       borderColor,
       textStyle,
       size,
@@ -128,7 +136,11 @@ class MindMapData {
   }
 
   /// Recursively update a node in the tree.
-  static MindMapData updateNodeInTree(MindMapData root, String nodeId, MindMapData Function(MindMapData) updater) {
+  static MindMapData updateNodeInTree(
+    MindMapData root,
+    String nodeId,
+    MindMapData Function(MindMapData) updater,
+  ) {
     if (root.id == nodeId) {
       return updater(root);
     }

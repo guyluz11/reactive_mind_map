@@ -1808,9 +1808,10 @@ class MindMapWidgetState extends State<MindMapWidget>
                       child: Text(
                         node.title,
                         textAlign: node.textAlign,
+                        textDirection: node.textDirection,
                         style: (node.textStyle ?? widget.style.defaultTextStyle)
                             .copyWith(color: textColor, fontSize: textSize),
-                        maxLines: 3,
+                        maxLines: widget.style.maxLines,
                         overflow: TextOverflow.ellipsis,
                         softWrap: true,
                       ),

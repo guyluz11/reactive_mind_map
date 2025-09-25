@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/mind_map_data.dart';
 import '../models/mind_map_style.dart';
 
@@ -9,6 +10,7 @@ class MarkmapPainter extends CustomPainter {
   final double animationValue;
   final String? selectedNodeId;
   final Function(String nodeId, Offset position)? onNodePositionCalculated;
+  final TextDirection textDirection;
 
   // 레이아웃 설정
   final double xSpacing = 200.0; // x축 간격
@@ -18,6 +20,7 @@ class MarkmapPainter extends CustomPainter {
   MarkmapPainter({
     required this.data,
     required this.style,
+    this.textDirection = TextDirection.ltr,
     this.animationValue = 1.0,
     this.selectedNodeId,
     this.onNodePositionCalculated,
@@ -58,15 +61,12 @@ class MarkmapPainter extends CustomPainter {
     final textPainter = TextPainter(
       text: TextSpan(
         text: text,
-        style: TextStyle(
-          fontSize: fontSize,
-          fontWeight: FontWeight.w600,
-          color: Colors.black87,
-        ),
+        style: style.defaultTextStyle.copyWith(fontSize: fontSize),
       ),
-      textDirection: TextDirection.ltr,
+      textDirection: textDirection,
+      maxLines: style.maxLines,
     );
-    textPainter.layout();
+    textPainter.layout(maxWidth: 300);
     return textPainter.height;
   }
 
@@ -168,14 +168,11 @@ class MarkmapPainter extends CustomPainter {
     final textPainter = TextPainter(
       text: TextSpan(
         text: text,
-        style: TextStyle(
-          fontSize: fontSize,
-          fontWeight: FontWeight.w600,
-          color: Colors.black87,
-        ),
+        style: style.defaultTextStyle.copyWith(fontSize: fontSize),
       ),
       textAlign: TextAlign.start,
-      textDirection: TextDirection.ltr,
+      textDirection: textDirection,
+      maxLines: style.maxLines,
     );
 
     textPainter.layout(maxWidth: 300);

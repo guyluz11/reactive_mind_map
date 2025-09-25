@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
-import '../enums/mind_map_layout.dart';
-import '../enums/node_shape.dart';
-import '../enums/mind_map_type.dart';
-import '../models/mind_map_node.dart';
 import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+
+import '../enums/mind_map_layout.dart';
+import '../enums/mind_map_type.dart';
+import '../enums/node_shape.dart';
+import '../models/mind_map_node.dart';
 
 /// 마인드맵의 전체적인 스타일을 정의하는 클래스 / Class that defines the overall style of the mind map
 class MindMapStyle {
@@ -109,6 +111,9 @@ class MindMapStyle {
   /// 커스텀 노드 크기 자동 조정 여부 / Whether to auto-adjust custom node size
   final bool enableCustomNodeAutoSizing;
 
+  /// 최대 줄 수 / Maximum number of lines
+  final int? maxLines;
+
   /// 노드 빌더 함수 / Node builder function
   final Widget Function(
     MindMapNode,
@@ -171,6 +176,7 @@ class MindMapStyle {
     this.minCustomNodeWidth = 60.0,
     this.minCustomNodeHeight = 40.0,
     this.enableCustomNodeAutoSizing = true,
+    this.maxLines = 3,
     this.nodeBuilder,
   });
 
@@ -210,6 +216,7 @@ class MindMapStyle {
     double? minCustomNodeWidth,
     double? minCustomNodeHeight,
     bool? enableCustomNodeAutoSizing,
+    int? maxLines,
     Widget Function(
       MindMapNode,
       bool,
@@ -256,6 +263,7 @@ class MindMapStyle {
       minCustomNodeHeight: minCustomNodeHeight ?? this.minCustomNodeHeight,
       enableCustomNodeAutoSizing:
           enableCustomNodeAutoSizing ?? this.enableCustomNodeAutoSizing,
+      maxLines: maxLines ?? this.maxLines,
       nodeBuilder: nodeBuilder ?? this.nodeBuilder,
     );
   }
@@ -347,12 +355,12 @@ class MindMapStyle {
     final textPainter = TextPainter(
       text: TextSpan(text: text, style: textStyle),
       textDirection: TextDirection.ltr,
-      maxLines: null,
+      maxLines: maxLines,
     );
     textPainter.layout(maxWidth: maxNodeWidth - textPadding.horizontal);
 
-    final textWidth = textPainter.width + 30;
-    final textHeight = textPainter.height + 30;
+    final textWidth = textPainter.width;
+    final textHeight = textPainter.height;
 
     // 패딩을 포함한 최종 크기 계산 / Calculate final size including padding
     double nodeWidth = textWidth + textPadding.horizontal;
@@ -386,7 +394,7 @@ class MindMapStyle {
     final textPainter = TextPainter(
       text: TextSpan(text: text, style: baseTextStyle),
       textDirection: TextDirection.ltr,
-      maxLines: 3, // 최대 3줄로 제한
+      maxLines: maxLines,
     );
 
     // 최대 너비 제약 설정

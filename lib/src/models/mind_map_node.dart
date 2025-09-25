@@ -37,6 +37,9 @@ class MindMapNode {
   /// Aligning the text in each node, defualt to TextAlign.center
   TextAlign? textAlign;
 
+  /// The direction to use for the text in each node, defualt to TextDirection.ltr
+  TextDirection? textDirection;
+
   /// 텍스트 스타일
   TextStyle? textStyle;
 
@@ -82,6 +85,7 @@ class MindMapNode {
     this.textColor,
     this.borderColor,
     this.textAlign,
+    this.textDirection,
     this.textStyle,
     this.size,
     this.isAnimating = false,
@@ -137,6 +141,7 @@ class MindMapNode {
       color: data.color ?? defaultNodeColors[level % defaultNodeColors.length],
       textColor: data.textColor,
       textAlign: data.textAlign,
+      textDirection: data.textDirection,
       borderColor: data.borderColor,
       textStyle: data.textStyle,
       size: data.size,

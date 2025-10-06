@@ -1810,7 +1810,7 @@ class MindMapWidgetState extends State<MindMapWidget>
                         textAlign: node.textAlign,
                         style: (node.textStyle ?? widget.style.defaultTextStyle)
                             .copyWith(color: textColor, fontSize: textSize),
-                        maxLines: 3,
+                        maxLines: 20,
                         overflow: TextOverflow.ellipsis,
                         softWrap: true,
                       ),

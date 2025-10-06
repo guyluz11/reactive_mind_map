@@ -119,6 +119,9 @@ class MindMapStyle {
   )?
   nodeBuilder;
 
+  /// 텍스트 방향 / Text direction
+  final TextDirection? textDirection;
+
   const MindMapStyle({
     this.mindMapType = MindMapType.default_,
     this.layout = MindMapLayout.right,
@@ -172,6 +175,7 @@ class MindMapStyle {
     this.minCustomNodeHeight = 40.0,
     this.enableCustomNodeAutoSizing = true,
     this.nodeBuilder,
+    this.textDirection,
   });
 
   /// 스타일 복사를 위한 copyWith 메소드 / copyWith method for style copying
@@ -218,6 +222,7 @@ class MindMapStyle {
       VoidCallback,
     )?
     nodeBuilder,
+    TextDirection? textDirection,
   }) {
     return MindMapStyle(
       mindMapType: mindMapType ?? this.mindMapType,
@@ -257,6 +262,7 @@ class MindMapStyle {
       enableCustomNodeAutoSizing:
           enableCustomNodeAutoSizing ?? this.enableCustomNodeAutoSizing,
       nodeBuilder: nodeBuilder ?? this.nodeBuilder,
+      textDirection: textDirection ?? this.textDirection,
     );
   }
 
@@ -346,7 +352,7 @@ class MindMapStyle {
 
     final textPainter = TextPainter(
       text: TextSpan(text: text, style: textStyle),
-      textDirection: TextDirection.ltr,
+      textDirection: textDirection ?? TextDirection.ltr,
       maxLines: null,
     );
     textPainter.layout(maxWidth: maxNodeWidth - textPadding.horizontal);
@@ -385,7 +391,7 @@ class MindMapStyle {
     // 텍스트 크기 정확히 계산
     final textPainter = TextPainter(
       text: TextSpan(text: text, style: baseTextStyle),
-      textDirection: TextDirection.ltr,
+      textDirection: textDirection ?? TextDirection.ltr,
       maxLines: 3, // 최대 3줄로 제한
     );
 

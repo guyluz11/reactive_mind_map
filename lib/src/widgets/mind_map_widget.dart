@@ -1813,6 +1813,7 @@ class MindMapWidgetState extends State<MindMapWidget>
                         maxLines: 20,
                         overflow: TextOverflow.ellipsis,
                         softWrap: true,
+                        textDirection: widget.style.textDirection,
                       ),
                     ),
                   ),

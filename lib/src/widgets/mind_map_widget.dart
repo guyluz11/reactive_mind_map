@@ -1630,16 +1630,16 @@ class MindMapWidgetState extends State<MindMapWidget>
       customSize: node.size,
     );
 
-    // 노드 위치 계산 (화면 경계 내로 제한)
-    // final nodeLeft = node.position.dx - nodeSize.width / 2;
-    // final nodeTop = node.position.dy - nodeSize.height / 2;
+    // 노드 위치 계산 (중심점 기준이므로 좌상단 좌표로 변환)
+    final nodeLeft = node.position.dx - nodeSize.width / 2;
+    final nodeTop = node.position.dy - nodeSize.height / 2;
 
-    // 화면 경계 체크 (캔버스 크기 기준) - 더 엄격한 제한
+    // 화면 경계 체크 (캔버스 크기 기준)
     final maxLeft = _actualCanvasSize.width - nodeSize.width;
     final maxTop = _actualCanvasSize.height - nodeSize.height;
 
-    double constrainedLeft = node.position.dx;
-    double constrainedTop = node.position.dy;
+    double constrainedLeft = nodeLeft;
+    double constrainedTop = nodeTop;
 
     if (widget.style.enableAutoSizing) {
       constrainedLeft = constrainedLeft.clamp(0.0, maxLeft);

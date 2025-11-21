@@ -11,7 +11,6 @@ import '../models/mind_map_node.dart';
 import '../models/mind_map_style.dart';
 // import '../enums/mind_map_type.dart';
 import '../painters/mind_map_painter.dart';
-import '../painters/node_painter.dart';
 import 'measure_size.dart';
 // import 'markmap_widget.dart'; // 개발 중
 
@@ -274,7 +273,10 @@ class MindMapWidgetState extends State<MindMapWidget>
     double maxNodeHeight = 0;
 
     for (var node in allNodes) {
-      final nodeSize = widget.style.getActualNodeSize(node.level);
+      final nodeSize = widget.style.getActualNodeSize(
+        node.level,
+        measuredSize: node.measuredSize,
+      );
 
       maxNodeWidth = math.max(maxNodeWidth, nodeSize.width);
       maxNodeHeight = math.max(maxNodeHeight, nodeSize.height);
@@ -410,7 +412,10 @@ class MindMapWidgetState extends State<MindMapWidget>
     double maxY = double.negativeInfinity;
 
     for (var node in collapsedNodes) {
-      final nodeSize = widget.style.getActualNodeSize(node.level);
+      final nodeSize = widget.style.getActualNodeSize(
+        node.level,
+        measuredSize: node.measuredSize,
+      );
 
       // 축소된 노드의 현재 위치를 기준으로 예상 확장 영역 계산
       // 레이아웃에 따라 확장 방향 예측
@@ -515,13 +520,19 @@ class MindMapWidgetState extends State<MindMapWidget>
     visited ??= <String>{};
 
     if (visited.contains(node.id)) {
-      final nodeSize = widget.style.getActualNodeSize(node.level);
+      final nodeSize = widget.style.getActualNodeSize(
+        node.level,
+        measuredSize: node.measuredSize,
+      );
       return nodeSize.height + widget.style.nodeMargin;
     }
     visited.add(node.id);
 
     if (node.children.isEmpty) {
-      final nodeSize = widget.style.getActualNodeSize(node.level);
+      final nodeSize = widget.style.getActualNodeSize(
+        node.level,
+        measuredSize: node.measuredSize,
+      );
       node.subtreeHeight = nodeSize.height + widget.style.nodeMargin;
       return node.subtreeHeight;
     }
@@ -534,7 +545,10 @@ class MindMapWidgetState extends State<MindMapWidget>
       );
     }
 
-    final nodeSize = widget.style.getActualNodeSize(node.level);
+    final nodeSize = widget.style.getActualNodeSize(
+      node.level,
+      measuredSize: node.measuredSize,
+    );
 
     final additionalMargin = nodeSize.height * 0.5;
     final minSpacing = widget.style.nodeMargin * 2;
@@ -555,13 +569,19 @@ class MindMapWidgetState extends State<MindMapWidget>
     visited ??= <String>{};
 
     if (visited.contains(node.id)) {
-      final nodeSize = widget.style.getActualNodeSize(node.level);
+      final nodeSize = widget.style.getActualNodeSize(
+        node.level,
+        measuredSize: node.measuredSize,
+      );
       return nodeSize.width + widget.style.nodeMargin;
     }
     visited.add(node.id);
 
     if (node.children.isEmpty) {
-      final nodeSize = widget.style.getActualNodeSize(node.level);
+      final nodeSize = widget.style.getActualNodeSize(
+        node.level,
+        measuredSize: node.measuredSize,
+      );
       node.subtreeWidth = nodeSize.width + widget.style.nodeMargin;
       return node.subtreeWidth;
     }
@@ -574,7 +594,10 @@ class MindMapWidgetState extends State<MindMapWidget>
       );
     }
 
-    final nodeSize = widget.style.getActualNodeSize(node.level);
+    final nodeSize = widget.style.getActualNodeSize(
+      node.level,
+      measuredSize: node.measuredSize,
+    );
 
     final additionalMargin = nodeSize.width * 0.5;
     final minSpacing = widget.style.nodeMargin * 2;
@@ -652,11 +675,17 @@ class MindMapWidgetState extends State<MindMapWidget>
 
   /// 동적 레벨 간격 계산 / Calculate dynamic level spacing
   double _calculateDynamicSpacing(MindMapNode parent, int level) {
-    final parentSize = widget.style.getActualNodeSize(parent.level);
+    final parentSize = widget.style.getActualNodeSize(
+      parent.level,
+      measuredSize: parent.measuredSize,
+    );
 
     double maxChildSize = 0;
     for (var child in parent.children) {
-      final childSize = widget.style.getActualNodeSize(child.level);
+      final childSize = widget.style.getActualNodeSize(
+        child.level,
+        measuredSize: child.measuredSize,
+      );
       maxChildSize = math.max(
         maxChildSize,
         math.max(childSize.width, childSize.height),
@@ -922,7 +951,10 @@ class MindMapWidgetState extends State<MindMapWidget>
     // 자식 노드들의 평균 크기 계산
     double avgNodeSize = 0.0;
     for (var child in children) {
-      final childSize = widget.style.getActualNodeSize(child.level);
+      final childSize = widget.style.getActualNodeSize(
+        child.level,
+        measuredSize: child.measuredSize,
+      );
       avgNodeSize += math.max(childSize.width, childSize.height);
     }
     avgNodeSize /= children.length;
@@ -1269,7 +1301,10 @@ class MindMapWidgetState extends State<MindMapWidget>
     double maxY = double.negativeInfinity;
 
     for (final node in allNodes) {
-      final size = widget.style.getActualNodeSize(node.level);
+      final size = widget.style.getActualNodeSize(
+        node.level,
+        measuredSize: node.measuredSize,
+      );
 
       final left = node.position.dx - size.width / 2;
       final right = node.position.dx + size.width / 2;
@@ -1406,7 +1441,10 @@ class MindMapWidgetState extends State<MindMapWidget>
     double maxY = double.negativeInfinity;
 
     for (final node in nodes) {
-      final size = widget.style.getActualNodeSize(node.level);
+      final size = widget.style.getActualNodeSize(
+        node.level,
+        measuredSize: node.measuredSize,
+      );
 
       final left = node.position.dx - size.width / 2;
       final right = node.position.dx + size.width / 2;
@@ -1589,7 +1627,10 @@ class MindMapWidgetState extends State<MindMapWidget>
 
     // 노드 크기 결정: measuredSize가 있으면 우선 사용, 없으면 스타일의 기본값 사용
     // 단, customSize(node.size)가 있으면 그것이 최우선
-    final calculatedSize = widget.style.getActualNodeSize(node.level);
+    final calculatedSize = widget.style.getActualNodeSize(
+      node.level,
+      measuredSize: node.measuredSize,
+    );
 
     // 렌더링에 사용할 크기 (레이아웃 계산에 사용된 크기)
     final layoutSize = node.measuredSize ?? calculatedSize;
@@ -1703,11 +1744,18 @@ class MindMapWidgetState extends State<MindMapWidget>
             }
           },
           child: Container(
-            constraints: BoxConstraints(
-              minWidth: widget.style.minNodeWidth,
-              minHeight: widget.style.minNodeHeight,
-              maxWidth: widget.style.maxNodeWidth,
-            ),
+            constraints:
+                widget.style.enableAutoSizing
+                    ? BoxConstraints(
+                      minWidth: widget.style.minNodeWidth,
+                      minHeight: widget.style.minNodeHeight,
+                      // No max constraints when auto-sizing to allow content to determine size
+                    )
+                    : BoxConstraints(
+                      minWidth: widget.style.minNodeWidth,
+                      minHeight: widget.style.minNodeHeight,
+                      maxWidth: widget.style.maxNodeWidth,
+                    ),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               decoration: ShapeDecoration(
@@ -1731,10 +1779,7 @@ class MindMapWidgetState extends State<MindMapWidget>
               ),
               child: Stack(
                 children: [
-                  Padding(
-                    padding: widget.style.textPadding,
-                    child: node.content,
-                  ),
+                  node.content,
                   if (node.hasChildren)
                     Positioned(
                       right: 4,
@@ -1802,72 +1847,4 @@ class MindMapWidgetState extends State<MindMapWidget>
       side: BorderSide(color: borderColor, width: borderWidth),
     );
   }
-}
-
-/// 노드 위젯을 그리는 커스텀 페인터 / Custom painter for node widgets
-class _NodeWidgetPainter extends CustomPainter {
-  final NodeShape shape;
-  final Color fillColor;
-  final Color borderColor;
-  final double borderWidth;
-  final bool shadowEnabled;
-  final Color shadowColor;
-  final double shadowBlurRadius;
-  final double shadowSpreadRadius;
-  final Offset shadowOffset;
-
-  _NodeWidgetPainter({
-    required this.shape,
-    required this.fillColor,
-    required this.borderColor,
-    required this.borderWidth,
-    required this.shadowEnabled,
-    required this.shadowColor,
-    required this.shadowBlurRadius,
-    required this.shadowSpreadRadius,
-    required this.shadowOffset,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
-
-    final fillPaint =
-        Paint()
-          ..color = fillColor
-          ..style = PaintingStyle.fill;
-
-    final borderPaint =
-        Paint()
-          ..color = borderColor
-          ..strokeWidth = borderWidth
-          ..style = PaintingStyle.stroke;
-
-    if (shadowEnabled) {
-      final shadowPaint =
-          Paint()
-            ..color = shadowColor
-            ..maskFilter = MaskFilter.blur(BlurStyle.normal, shadowBlurRadius)
-            ..style = PaintingStyle.fill;
-
-      final shadowRect = rect.shift(shadowOffset);
-      NodePainter.paintNode(
-        canvas: canvas,
-        rect: shadowRect,
-        shape: shape,
-        fillPaint: shadowPaint,
-      );
-    }
-
-    NodePainter.paintNode(
-      canvas: canvas,
-      rect: rect,
-      shape: shape,
-      fillPaint: fillPaint,
-      borderPaint: borderPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

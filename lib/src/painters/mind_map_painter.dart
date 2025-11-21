@@ -57,7 +57,7 @@ class MindMapPainter extends CustomPainter {
   ) {
     final distance = (child.position - parent.position).distance;
 
-    final parentSize = style.getActualNodeSize(parent.level);
+    final parentSize = style.getActualNodeSize(parent.level, measuredSize: parent.measuredSize);
 
     final minDistance = parentSize.width / 2 + 20;
 
@@ -76,7 +76,7 @@ class MindMapPainter extends CustomPainter {
           ..strokeWidth = style.connectionWidth
           ..style = PaintingStyle.stroke;
 
-    final childSize = style.getActualNodeSize(child.level);
+    final childSize = style.getActualNodeSize(child.level, measuredSize: child.measuredSize);
 
     final angle = math.atan2(
       child.position.dy - parent.position.dy,
@@ -174,8 +174,8 @@ class MindMapPainter extends CustomPainter {
     MindMapNode parent,
     MindMapNode child,
   ) {
-    final parentSize = style.getActualNodeSize(parent.level);
-    final childSize = style.getActualNodeSize(child.level);
+    final parentSize = style.getActualNodeSize(parent.level, measuredSize: parent.measuredSize);
+    final childSize = style.getActualNodeSize(child.level, measuredSize: child.measuredSize);
 
     Offset startPoint;
     Offset endPoint;
@@ -315,8 +315,8 @@ class MindMapPainter extends CustomPainter {
   ) {
     Offset control1, control2;
 
-    final parentSize = style.getActualNodeSize(parent.level);
-    final childSize = style.getActualNodeSize(child.level);
+    final parentSize = style.getActualNodeSize(parent.level, measuredSize: parent.measuredSize);
+    final childSize = style.getActualNodeSize(child.level, measuredSize: child.measuredSize);
 
     final distance = math.sqrt(
       math.pow(end.dx - start.dx, 2) + math.pow(end.dy - start.dy, 2),

@@ -287,8 +287,20 @@ class MindMapStyle {
     return 10.0;
   }
 
-  /// 노드의 실제 크기를 반환 (레벨별 기본 크기 사용) / Returns actual node size (use default size based on level)
-  Size getActualNodeSize(int level) {
+  /// 노드의 실제 크기를 반환 / Returns actual node size
+  ///
+  /// If [measuredSize] is provided and [enableAutoSizing] is true, uses the measured size
+  /// with min/max constraints. Otherwise uses level-based default sizing.
+  Size getActualNodeSize(int level, {Size? measuredSize}) {
+    // If we have a measured size and auto-sizing is enabled, use it
+    if (enableAutoSizing && measuredSize != null) {
+      return Size(
+        measuredSize.width.clamp(minNodeWidth, maxNodeWidth),
+        measuredSize.height.clamp(minNodeHeight, double.infinity),
+      );
+    }
+
+    // Otherwise use level-based default sizing
     final levelSize = getNodeSize(level);
     return Size(
       levelSize.clamp(minNodeWidth, maxNodeWidth),

@@ -31,8 +31,8 @@ class MindMapNode {
   /// 테두리 색상
   Color? borderColor;
 
-  /// 노드 크기
-  Size? size;
+  /// 측정된 노드 크기 (위젯 렌더링 후)
+  Size? measuredSize;
 
   /// 애니메이션 상태
   bool isAnimating;
@@ -71,7 +71,6 @@ class MindMapNode {
     this.targetPosition = Offset.zero,
     this.color = Colors.blue,
     this.borderColor,
-    this.size,
     this.isAnimating = false,
     this.hasFixedPosition = false,
     this.subtreeHeight = 0,
@@ -124,15 +123,9 @@ class MindMapNode {
       children: children,
       color: data.color ?? defaultNodeColors[level % defaultNodeColors.length],
       borderColor: data.borderColor,
-      size: data.size,
       level: level,
       customData: data.customData,
     );
-  }
-
-  /// 노드의 실제 크기를 계산
-  Size getActualSize(double defaultSize) {
-    return size ?? Size(defaultSize, defaultSize);
   }
 
   /// 하위 노드가 있는지 확인

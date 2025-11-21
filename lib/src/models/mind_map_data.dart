@@ -20,9 +20,6 @@ class MindMapData {
   /// 노드의 테두리 색상 (null이면 기본 색상 사용)
   final Color? borderColor;
 
-  /// 노드의 크기 (null이면 레벨에 따른 기본 크기 사용)
-  final Size? size;
-
   /// 사용자 정의 데이터
   final Map<String, dynamic>? customData;
 
@@ -33,7 +30,6 @@ class MindMapData {
     this.children = const [],
     this.color,
     this.borderColor,
-    this.size,
     this.customData,
   });
 
@@ -45,7 +41,6 @@ class MindMapData {
     List<MindMapData>? children,
     Color? color,
     Color? borderColor,
-    Size? size,
     Map<String, dynamic>? customData,
   }) {
     return MindMapData(
@@ -55,7 +50,6 @@ class MindMapData {
       children: children ?? this.children,
       color: color ?? this.color,
       borderColor: borderColor ?? this.borderColor,
-      size: size ?? this.size,
       customData: customData ?? this.customData,
     );
   }
@@ -71,7 +65,6 @@ class MindMapData {
         other.children == children &&
         other.color == color &&
         other.borderColor == borderColor &&
-        other.size == size &&
         other.customData == customData;
   }
 
@@ -84,7 +77,8 @@ class MindMapData {
       children,
       color,
       borderColor,
-      size,
+      color,
+      borderColor,
       customData,
     );
   }

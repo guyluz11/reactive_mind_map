@@ -12,6 +12,7 @@ import '../models/mind_map_style.dart';
 // import '../enums/mind_map_type.dart';
 import '../painters/mind_map_painter.dart';
 import '../painters/node_painter.dart';
+import 'measure_size.dart';
 // import 'markmap_widget.dart'; // 개발 중
 
 /// 커스터마이징 가능한 마인드맵 위젯 / Customizable mind map widget
@@ -273,10 +274,7 @@ class MindMapWidgetState extends State<MindMapWidget>
     double maxNodeHeight = 0;
 
     for (var node in allNodes) {
-      final nodeSize = widget.style.getActualNodeSize(
-        node.level,
-        customSize: node.size,
-      );
+      final nodeSize = widget.style.getActualNodeSize(node.level);
 
       maxNodeWidth = math.max(maxNodeWidth, nodeSize.width);
       maxNodeHeight = math.max(maxNodeHeight, nodeSize.height);
@@ -412,10 +410,7 @@ class MindMapWidgetState extends State<MindMapWidget>
     double maxY = double.negativeInfinity;
 
     for (var node in collapsedNodes) {
-      final nodeSize = widget.style.getActualNodeSize(
-        node.level,
-        customSize: node.size,
-      );
+      final nodeSize = widget.style.getActualNodeSize(node.level);
 
       // 축소된 노드의 현재 위치를 기준으로 예상 확장 영역 계산
       // 레이아웃에 따라 확장 방향 예측
@@ -520,19 +515,13 @@ class MindMapWidgetState extends State<MindMapWidget>
     visited ??= <String>{};
 
     if (visited.contains(node.id)) {
-      final nodeSize = widget.style.getActualNodeSize(
-        node.level,
-        customSize: node.size,
-      );
+      final nodeSize = widget.style.getActualNodeSize(node.level);
       return nodeSize.height + widget.style.nodeMargin;
     }
     visited.add(node.id);
 
     if (node.children.isEmpty) {
-      final nodeSize = widget.style.getActualNodeSize(
-        node.level,
-        customSize: node.size,
-      );
+      final nodeSize = widget.style.getActualNodeSize(node.level);
       node.subtreeHeight = nodeSize.height + widget.style.nodeMargin;
       return node.subtreeHeight;
     }
@@ -545,10 +534,7 @@ class MindMapWidgetState extends State<MindMapWidget>
       );
     }
 
-    final nodeSize = widget.style.getActualNodeSize(
-      node.level,
-      customSize: node.size,
-    );
+    final nodeSize = widget.style.getActualNodeSize(node.level);
 
     final additionalMargin = nodeSize.height * 0.5;
     final minSpacing = widget.style.nodeMargin * 2;
@@ -569,19 +555,13 @@ class MindMapWidgetState extends State<MindMapWidget>
     visited ??= <String>{};
 
     if (visited.contains(node.id)) {
-      final nodeSize = widget.style.getActualNodeSize(
-        node.level,
-        customSize: node.size,
-      );
+      final nodeSize = widget.style.getActualNodeSize(node.level);
       return nodeSize.width + widget.style.nodeMargin;
     }
     visited.add(node.id);
 
     if (node.children.isEmpty) {
-      final nodeSize = widget.style.getActualNodeSize(
-        node.level,
-        customSize: node.size,
-      );
+      final nodeSize = widget.style.getActualNodeSize(node.level);
       node.subtreeWidth = nodeSize.width + widget.style.nodeMargin;
       return node.subtreeWidth;
     }
@@ -594,10 +574,7 @@ class MindMapWidgetState extends State<MindMapWidget>
       );
     }
 
-    final nodeSize = widget.style.getActualNodeSize(
-      node.level,
-      customSize: node.size,
-    );
+    final nodeSize = widget.style.getActualNodeSize(node.level);
 
     final additionalMargin = nodeSize.width * 0.5;
     final minSpacing = widget.style.nodeMargin * 2;
@@ -675,17 +652,11 @@ class MindMapWidgetState extends State<MindMapWidget>
 
   /// 동적 레벨 간격 계산 / Calculate dynamic level spacing
   double _calculateDynamicSpacing(MindMapNode parent, int level) {
-    final parentSize = widget.style.getActualNodeSize(
-      parent.level,
-      customSize: parent.size,
-    );
+    final parentSize = widget.style.getActualNodeSize(parent.level);
 
     double maxChildSize = 0;
     for (var child in parent.children) {
-      final childSize = widget.style.getActualNodeSize(
-        child.level,
-        customSize: child.size,
-      );
+      final childSize = widget.style.getActualNodeSize(child.level);
       maxChildSize = math.max(
         maxChildSize,
         math.max(childSize.width, childSize.height),
@@ -951,10 +922,7 @@ class MindMapWidgetState extends State<MindMapWidget>
     // 자식 노드들의 평균 크기 계산
     double avgNodeSize = 0.0;
     for (var child in children) {
-      final childSize = widget.style.getActualNodeSize(
-        child.level,
-        customSize: child.size,
-      );
+      final childSize = widget.style.getActualNodeSize(child.level);
       avgNodeSize += math.max(childSize.width, childSize.height);
     }
     avgNodeSize /= children.length;
@@ -1301,10 +1269,7 @@ class MindMapWidgetState extends State<MindMapWidget>
     double maxY = double.negativeInfinity;
 
     for (final node in allNodes) {
-      final size = widget.style.getActualNodeSize(
-        node.level,
-        customSize: node.size,
-      );
+      final size = widget.style.getActualNodeSize(node.level);
 
       final left = node.position.dx - size.width / 2;
       final right = node.position.dx + size.width / 2;
@@ -1441,10 +1406,7 @@ class MindMapWidgetState extends State<MindMapWidget>
     double maxY = double.negativeInfinity;
 
     for (final node in nodes) {
-      final size = widget.style.getActualNodeSize(
-        node.level,
-        customSize: node.size,
-      );
+      final size = widget.style.getActualNodeSize(node.level);
 
       final left = node.position.dx - size.width / 2;
       final right = node.position.dx + size.width / 2;
@@ -1625,18 +1587,20 @@ class MindMapWidgetState extends State<MindMapWidget>
     final isFocused =
         widget.focusNodeId != null && widget.focusNodeId == node.id;
 
-    final nodeSize = widget.style.getActualNodeSize(
-      node.level,
-      customSize: node.size,
-    );
+    // 노드 크기 결정: measuredSize가 있으면 우선 사용, 없으면 스타일의 기본값 사용
+    // 단, customSize(node.size)가 있으면 그것이 최우선
+    final calculatedSize = widget.style.getActualNodeSize(node.level);
+
+    // 렌더링에 사용할 크기 (레이아웃 계산에 사용된 크기)
+    final layoutSize = node.measuredSize ?? calculatedSize;
 
     // 노드 위치 계산 (중심점 기준이므로 좌상단 좌표로 변환)
-    final nodeLeft = node.position.dx - nodeSize.width / 2;
-    final nodeTop = node.position.dy - nodeSize.height / 2;
+    final nodeLeft = node.position.dx - layoutSize.width / 2;
+    final nodeTop = node.position.dy - layoutSize.height / 2;
 
     // 화면 경계 체크 (캔버스 크기 기준)
-    final maxLeft = _actualCanvasSize.width - nodeSize.width;
-    final maxTop = _actualCanvasSize.height - nodeSize.height;
+    final maxLeft = _actualCanvasSize.width - layoutSize.width;
+    final maxTop = _actualCanvasSize.height - layoutSize.height;
 
     double constrainedLeft = nodeLeft;
     double constrainedTop = nodeTop;
@@ -1652,45 +1616,18 @@ class MindMapWidgetState extends State<MindMapWidget>
         key: ValueKey('positioned_${node.id}'),
         left: constrainedLeft,
         top: constrainedTop,
-        child: SizedBox(
-          width: nodeSize.width,
-          height: nodeSize.height,
-          child: widget.style.nodeBuilder!(
-            node,
-            isSelected,
-            () {
-              if (node.hasChildren) {
-                toggleNode(node);
-              } else {
-                _selectNode(node);
-              }
-            },
-            () {
-              final originalData = _findOriginalData(node.id);
-              if (originalData != null) {
-                widget.onNodeLongPress?.call(originalData);
-              }
-            },
-            () {
-              final originalData = _findOriginalData(node.id);
-              if (originalData != null) {
-                widget.onNodeDoubleTap?.call(originalData);
-              }
-            },
-          ),
-        ),
-      );
-    }
-
-    // 커스텀 노드 빌더가 있으면 사용
-    if (widget.style.nodeBuilder != null) {
-      return Positioned(
-        key: ValueKey('positioned_${node.id}'),
-        left: constrainedLeft,
-        top: constrainedTop,
-        child: SizedBox(
-          width: nodeSize.width,
-          height: nodeSize.height,
+        child: MeasureSize(
+          onChange: (size) {
+            if (node.measuredSize != size) {
+              node.measuredSize = size;
+              // 레이아웃 재계산 요청 (다음 프레임에 수행하여 빌드 중 setState 방지)
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  _calculateCanvasAndLayout();
+                }
+              });
+            }
+          },
           child: widget.style.nodeBuilder!(
             node,
             isSelected,
@@ -1733,52 +1670,70 @@ class MindMapWidgetState extends State<MindMapWidget>
       key: ValueKey('positioned_${node.id}'),
       left: constrainedLeft,
       top: constrainedTop,
-      child: GestureDetector(
-        onTap: () {
-          if (node.hasChildren) {
-            toggleNode(node);
-          } else {
-            _selectNode(node);
+      child: MeasureSize(
+        onChange: (size) {
+          if (node.measuredSize != size) {
+            node.measuredSize = size;
+            // 레이아웃 재계산 요청
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                _calculateCanvasAndLayout();
+              }
+            });
           }
         },
-        onLongPress: () {
-          final originalData = _findOriginalData(node.id);
-          if (originalData != null) {
-            widget.onNodeLongPress?.call(originalData);
-          }
-        },
-        onDoubleTap: () {
-          final originalData = _findOriginalData(node.id);
-          if (originalData != null) {
-            widget.onNodeDoubleTap?.call(originalData);
-          }
-        },
-        child: SizedBox(
-          width: nodeSize.width,
-          height: nodeSize.height,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: nodeSize.width,
-            height: nodeSize.height,
-            child: CustomPaint(
-              painter: _NodeWidgetPainter(
-                shape: widget.style.nodeShape,
-                fillColor: nodeColor,
-                borderColor: borderColor,
-                borderWidth: borderWidth,
-                shadowEnabled: widget.style.enableNodeShadow,
-                shadowColor: widget.style.nodeShadowColor,
-                shadowBlurRadius: widget.style.nodeShadowBlurRadius,
-                shadowSpreadRadius: widget.style.nodeShadowSpreadRadius,
-                shadowOffset: widget.style.nodeShadowOffset,
+        child: GestureDetector(
+          onTap: () {
+            if (node.hasChildren) {
+              toggleNode(node);
+            } else {
+              _selectNode(node);
+            }
+          },
+          onLongPress: () {
+            final originalData = _findOriginalData(node.id);
+            if (originalData != null) {
+              widget.onNodeLongPress?.call(originalData);
+            }
+          },
+          onDoubleTap: () {
+            final originalData = _findOriginalData(node.id);
+            if (originalData != null) {
+              widget.onNodeDoubleTap?.call(originalData);
+            }
+          },
+          child: Container(
+            constraints: BoxConstraints(
+              minWidth: widget.style.minNodeWidth,
+              minHeight: widget.style.minNodeHeight,
+              maxWidth: widget.style.maxNodeWidth,
+            ),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              decoration: ShapeDecoration(
+                color: nodeColor,
+                shape: _getShapeBorder(
+                  widget.style.nodeShape,
+                  borderColor,
+                  borderWidth,
+                ),
+                shadows:
+                    widget.style.enableNodeShadow
+                        ? [
+                          BoxShadow(
+                            color: widget.style.nodeShadowColor,
+                            blurRadius: widget.style.nodeShadowBlurRadius,
+                            spreadRadius: widget.style.nodeShadowSpreadRadius,
+                            offset: widget.style.nodeShadowOffset,
+                          ),
+                        ]
+                        : null,
               ),
               child: Stack(
                 children: [
-                  Center(
-                    child: Padding(
-                      padding: widget.style.textPadding,
-                      child: node.content,
-                    ),
+                  Padding(
+                    padding: widget.style.textPadding,
+                    child: node.content,
                   ),
                   if (node.hasChildren)
                     Positioned(
@@ -1804,6 +1759,47 @@ class MindMapWidgetState extends State<MindMapWidget>
           ),
         ),
       ),
+    );
+  }
+
+  ShapeBorder _getShapeBorder(
+    NodeShape shape,
+    Color borderColor,
+    double borderWidth,
+  ) {
+    switch (shape) {
+      case NodeShape.circle:
+        return CircleBorder(
+          side: BorderSide(color: borderColor, width: borderWidth),
+        );
+      case NodeShape.rectangle:
+        return RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(color: borderColor, width: borderWidth),
+        );
+      case NodeShape.roundedRectangle:
+        return RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: borderColor, width: borderWidth),
+        );
+      case NodeShape.ellipse:
+        return StadiumBorder(
+          side: BorderSide(color: borderColor, width: borderWidth),
+        );
+      case NodeShape.diamond:
+        return BeveledRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(color: borderColor, width: borderWidth),
+        );
+      case NodeShape.hexagon:
+        return BeveledRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+          side: BorderSide(color: borderColor, width: borderWidth),
+        );
+    }
+    return RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+      side: BorderSide(color: borderColor, width: borderWidth),
     );
   }
 }

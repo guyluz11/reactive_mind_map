@@ -287,14 +287,8 @@ class MindMapStyle {
     return 10.0;
   }
 
-  /// 노드의 실제 크기를 반환 (Size가 있으면 그것을 사용, 없으면 기본 크기 사용) / Returns actual node size (use custom size if available, otherwise use default size)
-  Size getActualNodeSize(int level, {Size? customSize}) {
-    // 커스텀 크기가 있는 경우
-    if (customSize != null) {
-      return adjustCustomNodeSize(customSize);
-    }
-
-    // 커스텀 크기가 없는 경우 레벨별 기본 크기 사용
+  /// 노드의 실제 크기를 반환 (레벨별 기본 크기 사용) / Returns actual node size (use default size based on level)
+  Size getActualNodeSize(int level) {
     final levelSize = getNodeSize(level);
     return Size(
       levelSize.clamp(minNodeWidth, maxNodeWidth),

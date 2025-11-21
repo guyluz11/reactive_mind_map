@@ -54,13 +54,13 @@ class _TestScreenState extends State<TestScreen> {
           children: [
             MindMapData(
               id: 'sub1',
-              content: const Text('서브1'),
               borderColor: Colors.purple,
+              content: const Text('Sub 1'),
             ),
             MindMapData(
               id: 'sub2',
               content: const Text(
-                'היי I am  גיא לוז.',
+                'היי I am  גיא לוז. Test test test',
                 textAlign: TextAlign.right,
               ),
             ),
@@ -145,7 +145,6 @@ class _TestScreenState extends State<TestScreen> {
                   '📂 노드 확장 시 카메라 동작:',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 8),
                 Wrap(
                   spacing: 4,
                   children: [
@@ -183,8 +182,6 @@ class _TestScreenState extends State<TestScreen> {
             ),
           ),
 
-          const SizedBox(height: 16),
-
           // 마인드맵
           Expanded(
             child: Container(
@@ -201,7 +198,6 @@ class _TestScreenState extends State<TestScreen> {
                     backgroundColor: const Color(0xFFF8F9FA),
                     selectedColor: Colors.red,
                     defaultNodeColors: const [
-                      Color(0xFF4CAF50),
                       Color(0xFF2196F3),
                       Color(0xFFFF9800),
                       Color(0xFFE91E63),
@@ -211,9 +207,7 @@ class _TestScreenState extends State<TestScreen> {
                   ),
                   cameraFocus: currentFocus,
                   focusNodeId: targetNodeId,
-                  focusAnimation: const Duration(
-                    milliseconds: 1000,
-                  ), // 더 긴 애니메이션
+                  focusAnimation: const Duration(), // 더 긴 애니메이션
                   isNodesCollapsed: false, // 모든 노드 펼쳐져 있음
                   nodeExpandCameraBehavior: expandBehavior,
                   onNodeTap: (node) {

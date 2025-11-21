@@ -1819,12 +1819,12 @@ class MindMapWidgetState extends State<MindMapWidget>
         );
       case NodeShape.rectangle:
         return RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(4),
           side: BorderSide(color: borderColor, width: borderWidth),
         );
       case NodeShape.roundedRectangle:
         return RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(8),
           side: BorderSide(color: borderColor, width: borderWidth),
         );
       case NodeShape.ellipse:
@@ -1833,17 +1833,17 @@ class MindMapWidgetState extends State<MindMapWidget>
         );
       case NodeShape.diamond:
         return BeveledRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(5),
           side: BorderSide(color: borderColor, width: borderWidth),
         );
       case NodeShape.hexagon:
         return BeveledRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(8),
           side: BorderSide(color: borderColor, width: borderWidth),
         );
     }
     return RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(4),
       side: BorderSide(color: borderColor, width: borderWidth),
     );
   }

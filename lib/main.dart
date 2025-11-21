@@ -159,48 +159,64 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // MARK: - 통합 데이터 및 스타일
 
+  // MARK: - 통합 데이터 및 스타일
+
   MindMapData _getUnifiedData() {
     return MindMapData(
       id: 'root',
-      title: '프로젝트 관리 시스템',
+      content: const Text(
+        '프로젝트 관리 시스템',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
       description: '완전한 프로젝트 생명주기',
       color: const Color(0xFF3B82F6),
-      textColor: Colors.white,
       size: const Size(160, 90),
       children: [
         MindMapData(
           id: 'planning',
-          title: '기획 단계',
+          content: const Text(
+            '기획 단계',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
           description: '프로젝트 기획 및 설계',
           color: const Color(0xFF10B981),
-          textColor: Colors.white,
           size: const Size(140, 80),
           customData: {'icon': '📝', 'priority': 'high'},
           children: [
             MindMapData(
               id: 'planning-1',
-              title: '요구사항 분석',
+              content: const Text(
+                '요구사항 분석',
+                style: TextStyle(color: Colors.white),
+              ),
               description: '사용자 니즈 파악 및 분석',
               color: const Color(0xFF059669),
-              textColor: Colors.white,
               size: const Size(120, 70),
               customData: {'icon': '🔍', 'department': 'PM'},
               children: [
                 MindMapData(
                   id: 'planning-1-1',
-                  title: '사용자 인터뷰',
+                  content: const Text(
+                    '사용자 인터뷰',
+                    style: TextStyle(color: Colors.white),
+                  ),
                   description: '직접 사용자와의 면담',
                   color: const Color(0xFF047857),
-                  textColor: Colors.white,
                   size: const Size(110, 60),
                   customData: {'icon': '👥', 'method': 'interview'},
                 ),
                 MindMapData(
                   id: 'planning-1-2',
-                  title: '시장 조사',
+                  content: const Text(
+                    '시장 조사',
+                    style: TextStyle(color: Colors.white),
+                  ),
                   description: '경쟁사 및 시장 분석',
                   color: const Color(0xFF065F46),
-                  textColor: Colors.white,
                   size: const Size(110, 60),
                   customData: {'icon': '📊', 'method': 'research'},
                 ),
@@ -208,28 +224,34 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             MindMapData(
               id: 'planning-2',
-              title: '기능 정의',
+              content: const Text(
+                '기능 정의',
+                style: TextStyle(color: Colors.white),
+              ),
               description: '핵심 기능 및 요구사항 정의',
               color: const Color(0xFF047857),
-              textColor: Colors.white,
               size: const Size(120, 70),
               customData: {'icon': '⚙️', 'department': 'UX'},
               children: [
                 MindMapData(
                   id: 'planning-2-1',
-                  title: '사용자 스토리',
+                  content: const Text(
+                    '사용자 스토리',
+                    style: TextStyle(color: Colors.white),
+                  ),
                   description: '사용자 관점의 기능 정의',
                   color: const Color(0xFF065F46),
-                  textColor: Colors.white,
                   size: const Size(110, 60),
                   customData: {'icon': '📖', 'type': 'story'},
                 ),
                 MindMapData(
                   id: 'planning-2-2',
-                  title: '기능 명세서',
+                  content: const Text(
+                    '기능 명세서',
+                    style: TextStyle(color: Colors.white),
+                  ),
                   description: '상세한 기능 명세 작성',
                   color: const Color(0xFF064E3B),
-                  textColor: Colors.white,
                   size: const Size(110, 60),
                   customData: {'icon': '📋', 'type': 'spec'},
                 ),
@@ -237,10 +259,12 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             MindMapData(
               id: 'planning-3',
-              title: '아키텍처 설계',
+              content: const Text(
+                '아키텍처 설계',
+                style: TextStyle(color: Colors.white),
+              ),
               description: '시스템 아키텍처 설계',
               color: const Color(0xFF065F46),
-              textColor: Colors.white,
               size: const Size(120, 70),
               customData: {'icon': '🏗️', 'department': 'Architecture'},
             ),
@@ -248,46 +272,56 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         MindMapData(
           id: 'development',
-          title: '개발 단계',
+          content: const Text(
+            '개발 단계',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
           description: '실제 코드 구현',
           color: const Color(0xFFF59E0B),
-          textColor: Colors.white,
           size: const Size(140, 80),
           customData: {'icon': '💻', 'priority': 'medium'},
           children: [
             MindMapData(
               id: 'development-1',
-              title: '프론트엔드',
+              content: const Text(
+                '프론트엔드',
+                style: TextStyle(color: Colors.white),
+              ),
               description: '사용자 인터페이스 개발',
               color: const Color(0xFFDC2626),
-              textColor: Colors.white,
               size: const Size(120, 70),
               customData: {'icon': '🖥️', 'tech': 'Flutter'},
               children: [
                 MindMapData(
                   id: 'development-1-1',
-                  title: 'UI 컴포넌트',
+                  content: const Text(
+                    'UI 컴포넌트',
+                    style: TextStyle(color: Colors.white),
+                  ),
                   description: '재사용 가능한 UI 컴포넌트',
                   color: const Color(0xFFB91C1C),
-                  textColor: Colors.white,
                   size: const Size(110, 60),
                   customData: {'icon': '🧩', 'type': 'component'},
                 ),
                 MindMapData(
                   id: 'development-1-2',
-                  title: '페이지 구현',
+                  content: const Text(
+                    '페이지 구현',
+                    style: TextStyle(color: Colors.white),
+                  ),
                   description: '각 페이지별 화면 구현',
                   color: const Color(0xFF991B1B),
-                  textColor: Colors.white,
                   size: const Size(110, 60),
                   customData: {'icon': '📄', 'type': 'page'},
                 ),
                 MindMapData(
                   id: 'development-1-3',
-                  title: '상태 관리',
+                  content: const Text(
+                    '상태 관리',
+                    style: TextStyle(color: Colors.white),
+                  ),
                   description: '애플리케이션 상태 관리',
                   color: const Color(0xFF7F1D1D),
-                  textColor: Colors.white,
                   size: const Size(110, 60),
                   customData: {'icon': '🔄', 'type': 'state'},
                 ),
@@ -295,37 +329,42 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             MindMapData(
               id: 'development-2',
-              title: '백엔드',
+              content: const Text('백엔드', style: TextStyle(color: Colors.white)),
               description: '서버 로직 및 API 개발',
               color: const Color(0xFF7C3AED),
-              textColor: Colors.white,
               size: const Size(120, 70),
               customData: {'icon': '⚙️', 'tech': 'Node.js'},
               children: [
                 MindMapData(
                   id: 'development-2-1',
-                  title: 'API 엔드포인트',
+                  content: const Text(
+                    'API 엔드포인트',
+                    style: TextStyle(color: Colors.white),
+                  ),
                   description: 'RESTful API 구현',
                   color: const Color(0xFF6D28D9),
-                  textColor: Colors.white,
                   size: const Size(110, 60),
                   customData: {'icon': '🔗', 'type': 'api'},
                 ),
                 MindMapData(
                   id: 'development-2-2',
-                  title: '데이터베이스',
+                  content: const Text(
+                    '데이터베이스',
+                    style: TextStyle(color: Colors.white),
+                  ),
                   description: '데이터베이스 설계 및 구현',
                   color: const Color(0xFF5B21B6),
-                  textColor: Colors.white,
                   size: const Size(110, 60),
                   customData: {'icon': '🗄️', 'type': 'database'},
                 ),
                 MindMapData(
                   id: 'development-2-3',
-                  title: '인증 시스템',
+                  content: const Text(
+                    '인증 시스템',
+                    style: TextStyle(color: Colors.white),
+                  ),
                   description: '사용자 인증 및 권한 관리',
                   color: const Color(0xFF4C1D95),
-                  textColor: Colors.white,
                   size: const Size(110, 60),
                   customData: {'icon': '🔐', 'type': 'auth'},
                 ),
@@ -333,28 +372,34 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             MindMapData(
               id: 'development-3',
-              title: 'DevOps',
+              content: const Text(
+                'DevOps',
+                style: TextStyle(color: Colors.white),
+              ),
               description: '배포 및 인프라 관리',
               color: const Color(0xFF059669),
-              textColor: Colors.white,
               size: const Size(120, 70),
               customData: {'icon': '🚀', 'tech': 'Docker'},
               children: [
                 MindMapData(
                   id: 'development-3-1',
-                  title: 'CI/CD 파이프라인',
+                  content: const Text(
+                    'CI/CD 파이프라인',
+                    style: TextStyle(color: Colors.white),
+                  ),
                   description: '지속적 통합 및 배포',
                   color: const Color(0xFF047857),
-                  textColor: Colors.white,
                   size: const Size(110, 60),
                   customData: {'icon': '⚡', 'type': 'pipeline'},
                 ),
                 MindMapData(
                   id: 'development-3-2',
-                  title: '모니터링',
+                  content: const Text(
+                    '모니터링',
+                    style: TextStyle(color: Colors.white),
+                  ),
                   description: '시스템 모니터링 및 로깅',
                   color: const Color(0xFF065F46),
-                  textColor: Colors.white,
                   size: const Size(110, 60),
                   customData: {'icon': '📊', 'type': 'monitoring'},
                 ),
@@ -364,37 +409,45 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         MindMapData(
           id: 'testing',
-          title: '테스트 단계',
+          content: const Text(
+            '테스트 단계',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
           description: '품질 보증 및 테스트',
           color: const Color(0xFF8B5CF6),
-          textColor: Colors.white,
           size: const Size(140, 80),
           customData: {'icon': '🧪', 'priority': 'low'},
           children: [
             MindMapData(
               id: 'testing-1',
-              title: '단위 테스트',
+              content: const Text(
+                '단위 테스트',
+                style: TextStyle(color: Colors.white),
+              ),
               description: '개별 컴포넌트 테스트',
               color: const Color(0xFF7C3AED),
-              textColor: Colors.white,
               size: const Size(120, 70),
               customData: {'icon': '🔬', 'type': 'unit'},
             ),
             MindMapData(
               id: 'testing-2',
-              title: '통합 테스트',
+              content: const Text(
+                '통합 테스트',
+                style: TextStyle(color: Colors.white),
+              ),
               description: '시스템 통합 테스트',
               color: const Color(0xFF6D28D9),
-              textColor: Colors.white,
               size: const Size(120, 70),
               customData: {'icon': '🔗', 'type': 'integration'},
             ),
             MindMapData(
               id: 'testing-3',
-              title: '사용자 테스트',
+              content: const Text(
+                '사용자 테스트',
+                style: TextStyle(color: Colors.white),
+              ),
               description: '실제 사용자 환경 테스트',
               color: const Color(0xFF5B21B6),
-              textColor: Colors.white,
               size: const Size(120, 70),
               customData: {'icon': '👥', 'type': 'user'},
             ),
@@ -402,28 +455,34 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         MindMapData(
           id: 'deployment',
-          title: '배포 단계',
+          content: const Text(
+            '배포 단계',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
           description: '프로덕션 환경 배포',
           color: const Color(0xFFEF4444),
-          textColor: Colors.white,
           size: const Size(140, 80),
           customData: {'icon': '🚀', 'priority': 'high'},
           children: [
             MindMapData(
               id: 'deployment-1',
-              title: '스테이징 배포',
+              content: const Text(
+                '스테이징 배포',
+                style: TextStyle(color: Colors.white),
+              ),
               description: '테스트 환경 배포',
               color: const Color(0xFFDC2626),
-              textColor: Colors.white,
               size: const Size(120, 70),
               customData: {'icon': '🧪', 'env': 'staging'},
             ),
             MindMapData(
               id: 'deployment-2',
-              title: '프로덕션 배포',
+              content: const Text(
+                '프로덕션 배포',
+                style: TextStyle(color: Colors.white),
+              ),
               description: '실제 서비스 배포',
               color: const Color(0xFFB91C1C),
-              textColor: Colors.white,
               size: const Size(120, 70),
               customData: {'icon': '🌐', 'env': 'production'},
             ),
@@ -431,28 +490,34 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         MindMapData(
           id: 'maintenance',
-          title: '유지보수',
+          content: const Text(
+            '유지보수',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
           description: '지속적인 서비스 관리',
           color: const Color(0xFF6B7280),
-          textColor: Colors.white,
           size: const Size(140, 80),
           customData: {'icon': '🔧', 'priority': 'medium'},
           children: [
             MindMapData(
               id: 'maintenance-1',
-              title: '버그 수정',
+              content: const Text(
+                '버그 수정',
+                style: TextStyle(color: Colors.white),
+              ),
               description: '발견된 문제점 수정',
               color: const Color(0xFF4B5563),
-              textColor: Colors.white,
               size: const Size(120, 70),
               customData: {'icon': '🐛', 'type': 'bugfix'},
             ),
             MindMapData(
               id: 'maintenance-2',
-              title: '성능 최적화',
+              content: const Text(
+                '성능 최적화',
+                style: TextStyle(color: Colors.white),
+              ),
               description: '시스템 성능 개선',
               color: const Color(0xFF374151),
-              textColor: Colors.white,
               size: const Size(120, 70),
               customData: {'icon': '⚡', 'type': 'optimization'},
             ),
@@ -529,6 +594,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   // MARK: - 스타일 레벨 커스텀 노드 빌더 (스타일에 포함된 버전)
+  // MARK: - 스타일 레벨 커스텀 노드 빌더 (스타일에 포함된 버전)
   Widget _buildStyleLevelCustomNode(
     MindMapNode node,
     bool isSelected,
@@ -539,11 +605,9 @@ class _MyHomePageState extends State<MyHomePage> {
     final icon = node.customData?['icon'] as String? ?? '📋';
     final priority = node.customData?['priority'] as String? ?? 'medium';
 
-    final actualSize = MindMapStyle().getActualNodeSize(
-      node.title,
+    final actualSize = const MindMapStyle().getActualNodeSize(
       node.level,
       customSize: node.size,
-      customTextStyle: node.textStyle,
     );
 
     // 노드 크기에 따른 레이아웃 결정
@@ -630,20 +694,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   Text(icon, style: const TextStyle(fontSize: 10)),
                   const SizedBox(height: 1),
                 ],
-                // 제목 텍스트
-                Flexible(
-                  child: Text(
-                    node.title,
-                    style: TextStyle(
-                      fontSize: isSmallNode ? 8 : 10, // 더 작은 폰트
-                      fontWeight: FontWeight.bold,
-                      color: node.textColor ?? Colors.white,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: isSmallNode ? 1 : 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
+                // 제목 텍스트 (node.content 사용)
+                Flexible(child: node.content),
               ],
             ),
           ),
@@ -672,7 +724,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _handleNodeTap(MindMapData node) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('탭: ${node.title.replaceAll('\n', ' ')}'),
+        content: Text('탭: ${node.description}'),
         duration: const Duration(seconds: 1),
       ),
     );
@@ -683,7 +735,7 @@ class _MyHomePageState extends State<MyHomePage> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(node.title.replaceAll('\n', ' ')),
+            title: Text(node.description),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,

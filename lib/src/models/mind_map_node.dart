@@ -7,8 +7,8 @@ class MindMapNode {
   /// 노드 ID
   final String id;
 
-  /// 노드 제목
-  final String title;
+  /// 노드 컨텐츠
+  final Widget content;
 
   /// 노드 설명
   final String description;
@@ -28,17 +28,8 @@ class MindMapNode {
   /// 노드 색상
   Color color;
 
-  /// 텍스트 색상
-  Color? textColor;
-
   /// 테두리 색상
   Color? borderColor;
-
-  /// Aligning the text in each node, defualt to TextAlign.center
-  TextAlign? textAlign;
-
-  /// 텍스트 스타일
-  TextStyle? textStyle;
 
   /// 노드 크기
   Size? size;
@@ -72,17 +63,14 @@ class MindMapNode {
 
   MindMapNode({
     required this.id,
-    required this.title,
+    required this.content,
     required this.description,
     this.children = const [],
     this.isExpanded = false,
     this.position = Offset.zero,
     this.targetPosition = Offset.zero,
     this.color = Colors.blue,
-    this.textColor,
     this.borderColor,
-    this.textAlign,
-    this.textStyle,
     this.size,
     this.isAnimating = false,
     this.hasFixedPosition = false,
@@ -131,14 +119,11 @@ class MindMapNode {
 
     return MindMapNode(
       id: data.id,
-      title: data.title,
+      content: data.content,
       description: data.description,
       children: children,
       color: data.color ?? defaultNodeColors[level % defaultNodeColors.length],
-      textColor: data.textColor,
-      textAlign: data.textAlign,
       borderColor: data.borderColor,
-      textStyle: data.textStyle,
       size: data.size,
       level: level,
       customData: data.customData,
@@ -158,6 +143,6 @@ class MindMapNode {
 
   @override
   String toString() {
-    return 'MindMapNode(id: $id, title: $title, level: $level, children: ${children.length})';
+    return 'MindMapNode(id: $id, level: $level, children: ${children.length})';
   }
 }

@@ -42,7 +42,7 @@ class MarkmapPainter extends CustomPainter {
   /// 서브트리 전체 높이 계산
   double _subtreeHeight(MindMapData node, int level) {
     if (node.children.isEmpty) {
-      return _textHeight(node.title, level);
+      return 40.0; // Default height
     }
 
     double childrenHeight = 0;
@@ -50,38 +50,6 @@ class MarkmapPainter extends CustomPainter {
       childrenHeight += _subtreeHeight(child, level + 1) + ySpacing;
     }
     return childrenHeight - ySpacing; // 마지막 ySpacing 제외
-  }
-
-  /// 텍스트 높이 측정
-  double _textHeight(String text, int level) {
-    final fontSize = _getFontSize(level);
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: text,
-        style: TextStyle(
-          fontSize: fontSize,
-          fontWeight: FontWeight.w600,
-          color: Colors.black87,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout();
-    return textPainter.height;
-  }
-
-  /// 레벨별 폰트 크기
-  double _getFontSize(int level) {
-    switch (level) {
-      case 0:
-        return 20.0;
-      case 1:
-        return 18.0;
-      case 2:
-        return 16.0;
-      default:
-        return 14.0;
-    }
   }
 
   /// 재귀적으로 노드 그리기
@@ -92,9 +60,6 @@ class MarkmapPainter extends CustomPainter {
     Map<String, Offset> nodePositions,
     int level,
   ) {
-    final isSelected = selectedNodeId == node.id;
-    final fontSize = _getFontSize(level);
-    // final textHeight = _textHeight(node.title, level);
     final subtreeHeight = _subtreeHeight(node, level);
 
     // 자식 노드 y 시작점 계산
@@ -117,11 +82,6 @@ class MarkmapPainter extends CustomPainter {
       _drawNode(canvas, child, childPos, nodePositions, level + 1);
 
       childY += childSubtreeHeight + ySpacing;
-    }
-
-    // 텍스트 그리기 (선 끝점에)
-    if (animationValue > 0.5) {
-      _drawText(canvas, position, node.title, fontSize, isSelected);
     }
 
     // 위치 정보 저장
@@ -155,58 +115,6 @@ class MarkmapPainter extends CustomPainter {
           ..strokeCap = StrokeCap.round;
 
     canvas.drawPath(path, paint);
-  }
-
-  /// 텍스트 그리기
-  void _drawText(
-    Canvas canvas,
-    Offset position,
-    String text,
-    double fontSize,
-    bool isSelected,
-  ) {
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: text,
-        style: TextStyle(
-          fontSize: fontSize,
-          fontWeight: FontWeight.w600,
-          color: Colors.black87,
-        ),
-      ),
-      textAlign: TextAlign.start,
-      textDirection: TextDirection.ltr,
-    );
-
-    textPainter.layout(maxWidth: 300);
-
-    // 텍스트를 위치에 그리기
-    final textOffset = Offset(
-      position.dx,
-      position.dy - textPainter.height / 2,
-    );
-    textPainter.paint(canvas, textOffset);
-
-    // 선택 효과
-    if (isSelected) {
-      final selectionRect = Rect.fromLTWH(
-        textOffset.dx - 4,
-        textOffset.dy - 2,
-        textPainter.width + 8,
-        textPainter.height + 4,
-      );
-
-      final selectionPaint =
-          Paint()
-            ..color = style.selectionBorderColor
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = style.selectionBorderWidth;
-
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(selectionRect, const Radius.circular(4)),
-        selectionPaint,
-      );
-    }
   }
 
   @override

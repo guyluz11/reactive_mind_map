@@ -274,10 +274,8 @@ class MindMapWidgetState extends State<MindMapWidget>
 
     for (var node in allNodes) {
       final nodeSize = widget.style.getActualNodeSize(
-        node.title,
         node.level,
         customSize: node.size,
-        customTextStyle: node.textStyle,
       );
 
       maxNodeWidth = math.max(maxNodeWidth, nodeSize.width);
@@ -415,10 +413,8 @@ class MindMapWidgetState extends State<MindMapWidget>
 
     for (var node in collapsedNodes) {
       final nodeSize = widget.style.getActualNodeSize(
-        node.title,
         node.level,
         customSize: node.size,
-        customTextStyle: node.textStyle,
       );
 
       // 축소된 노드의 현재 위치를 기준으로 예상 확장 영역 계산
@@ -525,10 +521,8 @@ class MindMapWidgetState extends State<MindMapWidget>
 
     if (visited.contains(node.id)) {
       final nodeSize = widget.style.getActualNodeSize(
-        node.title,
         node.level,
         customSize: node.size,
-        customTextStyle: node.textStyle,
       );
       return nodeSize.height + widget.style.nodeMargin;
     }
@@ -536,10 +530,8 @@ class MindMapWidgetState extends State<MindMapWidget>
 
     if (node.children.isEmpty) {
       final nodeSize = widget.style.getActualNodeSize(
-        node.title,
         node.level,
         customSize: node.size,
-        customTextStyle: node.textStyle,
       );
       node.subtreeHeight = nodeSize.height + widget.style.nodeMargin;
       return node.subtreeHeight;
@@ -554,10 +546,8 @@ class MindMapWidgetState extends State<MindMapWidget>
     }
 
     final nodeSize = widget.style.getActualNodeSize(
-      node.title,
       node.level,
       customSize: node.size,
-      customTextStyle: node.textStyle,
     );
 
     final additionalMargin = nodeSize.height * 0.5;
@@ -580,10 +570,8 @@ class MindMapWidgetState extends State<MindMapWidget>
 
     if (visited.contains(node.id)) {
       final nodeSize = widget.style.getActualNodeSize(
-        node.title,
         node.level,
         customSize: node.size,
-        customTextStyle: node.textStyle,
       );
       return nodeSize.width + widget.style.nodeMargin;
     }
@@ -591,10 +579,8 @@ class MindMapWidgetState extends State<MindMapWidget>
 
     if (node.children.isEmpty) {
       final nodeSize = widget.style.getActualNodeSize(
-        node.title,
         node.level,
         customSize: node.size,
-        customTextStyle: node.textStyle,
       );
       node.subtreeWidth = nodeSize.width + widget.style.nodeMargin;
       return node.subtreeWidth;
@@ -609,10 +595,8 @@ class MindMapWidgetState extends State<MindMapWidget>
     }
 
     final nodeSize = widget.style.getActualNodeSize(
-      node.title,
       node.level,
       customSize: node.size,
-      customTextStyle: node.textStyle,
     );
 
     final additionalMargin = nodeSize.width * 0.5;
@@ -692,19 +676,15 @@ class MindMapWidgetState extends State<MindMapWidget>
   /// 동적 레벨 간격 계산 / Calculate dynamic level spacing
   double _calculateDynamicSpacing(MindMapNode parent, int level) {
     final parentSize = widget.style.getActualNodeSize(
-      parent.title,
       parent.level,
       customSize: parent.size,
-      customTextStyle: parent.textStyle,
     );
 
     double maxChildSize = 0;
     for (var child in parent.children) {
       final childSize = widget.style.getActualNodeSize(
-        child.title,
         child.level,
         customSize: child.size,
-        customTextStyle: child.textStyle,
       );
       maxChildSize = math.max(
         maxChildSize,
@@ -972,10 +952,8 @@ class MindMapWidgetState extends State<MindMapWidget>
     double avgNodeSize = 0.0;
     for (var child in children) {
       final childSize = widget.style.getActualNodeSize(
-        child.title,
         child.level,
         customSize: child.size,
-        customTextStyle: child.textStyle,
       );
       avgNodeSize += math.max(childSize.width, childSize.height);
     }
@@ -1324,10 +1302,8 @@ class MindMapWidgetState extends State<MindMapWidget>
 
     for (final node in allNodes) {
       final size = widget.style.getActualNodeSize(
-        node.title,
         node.level,
         customSize: node.size,
-        customTextStyle: node.textStyle,
       );
 
       final left = node.position.dx - size.width / 2;
@@ -1466,10 +1442,8 @@ class MindMapWidgetState extends State<MindMapWidget>
 
     for (final node in nodes) {
       final size = widget.style.getActualNodeSize(
-        node.title,
         node.level,
         customSize: node.size,
-        customTextStyle: node.textStyle,
       );
 
       final left = node.position.dx - size.width / 2;
@@ -1651,26 +1625,26 @@ class MindMapWidgetState extends State<MindMapWidget>
     final isFocused =
         widget.focusNodeId != null && widget.focusNodeId == node.id;
 
-    final actualSize = widget.style.getActualNodeSize(
-      node.title,
+    final nodeSize = widget.style.getActualNodeSize(
       node.level,
       customSize: node.size,
-      customTextStyle: node.textStyle,
     );
 
     // 노드 위치 계산 (화면 경계 내로 제한)
-    final nodeLeft = node.position.dx - actualSize.width / 2;
-    final nodeTop = node.position.dy - actualSize.height / 2;
+    // final nodeLeft = node.position.dx - nodeSize.width / 2;
+    // final nodeTop = node.position.dy - nodeSize.height / 2;
 
     // 화면 경계 체크 (캔버스 크기 기준) - 더 엄격한 제한
-    final maxLeft = _actualCanvasSize.width - actualSize.width;
-    final maxTop = _actualCanvasSize.height - actualSize.height;
+    final maxLeft = _actualCanvasSize.width - nodeSize.width;
+    final maxTop = _actualCanvasSize.height - nodeSize.height;
 
-    final constrainedLeft = nodeLeft.clamp(
-      0.0,
-      math.max(0.0, maxLeft).toDouble(),
-    );
-    final constrainedTop = nodeTop.clamp(0.0, math.max(0.0, maxTop).toDouble());
+    double constrainedLeft = node.position.dx;
+    double constrainedTop = node.position.dy;
+
+    if (widget.style.enableAutoSizing) {
+      constrainedLeft = constrainedLeft.clamp(0.0, maxLeft);
+      constrainedTop = constrainedTop.clamp(0.0, maxTop);
+    }
 
     // 스타일의 노드 빌더가 있으면 우선 사용
     if (widget.style.nodeBuilder != null) {
@@ -1679,8 +1653,8 @@ class MindMapWidgetState extends State<MindMapWidget>
         left: constrainedLeft,
         top: constrainedTop,
         child: SizedBox(
-          width: actualSize.width,
-          height: actualSize.height,
+          width: nodeSize.width,
+          height: nodeSize.height,
           child: widget.style.nodeBuilder!(
             node,
             isSelected,
@@ -1715,8 +1689,8 @@ class MindMapWidgetState extends State<MindMapWidget>
         left: constrainedLeft,
         top: constrainedTop,
         child: SizedBox(
-          width: actualSize.width,
-          height: actualSize.height,
+          width: nodeSize.width,
+          height: nodeSize.height,
           child: widget.style.nodeBuilder!(
             node,
             isSelected,
@@ -1745,11 +1719,9 @@ class MindMapWidgetState extends State<MindMapWidget>
     }
 
     // 기본 노드 빌더 사용
-    final textSize = widget.style.getTextSize(node.level);
     final nodeColor =
         ((isFocused || isSelected) ? widget.style.selectedColor : node.color) ??
         Colors.blue;
-    final textColor = node.textColor ?? widget.style.defaultTextStyle.color;
     final borderColor =
         (isFocused || isSelected)
             ? widget.style.selectionBorderColor
@@ -1782,12 +1754,12 @@ class MindMapWidgetState extends State<MindMapWidget>
           }
         },
         child: SizedBox(
-          width: actualSize.width,
-          height: actualSize.height,
+          width: nodeSize.width,
+          height: nodeSize.height,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            width: actualSize.width,
-            height: actualSize.height,
+            width: nodeSize.width,
+            height: nodeSize.height,
             child: CustomPaint(
               painter: _NodeWidgetPainter(
                 shape: widget.style.nodeShape,
@@ -1805,16 +1777,7 @@ class MindMapWidgetState extends State<MindMapWidget>
                   Center(
                     child: Padding(
                       padding: widget.style.textPadding,
-                      child: Text(
-                        node.title,
-                        textAlign: node.textAlign,
-                        style: (node.textStyle ?? widget.style.defaultTextStyle)
-                            .copyWith(color: textColor, fontSize: textSize),
-                        maxLines: 20,
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: true,
-                        textDirection: widget.style.textDirection,
-                      ),
+                      child: node.content,
                     ),
                   ),
                   if (node.hasChildren)

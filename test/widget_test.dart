@@ -12,26 +12,26 @@ import 'package:reactive_mind_map/reactive_mind_map.dart';
 void main() {
   group('MindMapWidget Tests', () {
     testWidgets('MindMapWidget 기본 렌더링 테스트', (WidgetTester tester) async {
-      const testData = MindMapData(
+      final testData = MindMapData(
         id: 'test_root',
-        title: 'Test Root',
+        content: const Text('Test Root'),
         description: 'Test root node',
         children: [
           MindMapData(
             id: 'child1',
-            title: 'Child 1',
+            content: const Text('Child 1'),
             description: 'First child',
           ),
           MindMapData(
             id: 'child2',
-            title: 'Child 2',
+            content: const Text('Child 2'),
             description: 'Second child',
           ),
         ],
       );
 
       await tester.pumpWidget(
-        const MaterialApp(home: Scaffold(body: MindMapWidget(data: testData))),
+        MaterialApp(home: Scaffold(body: MindMapWidget(data: testData))),
       );
 
       // 루트 노드가 렌더링되는지 확인
@@ -42,9 +42,9 @@ void main() {
     });
 
     testWidgets('MindMapWidget 스타일 적용 테스트', (WidgetTester tester) async {
-      const testData = MindMapData(
+      final testData = MindMapData(
         id: 'styled_root',
-        title: 'Styled Root',
+        content: const Text('Styled Root'),
         description: 'Root with style',
       );
 
@@ -55,7 +55,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: MindMapWidget(data: testData, style: customStyle),
           ),
@@ -67,9 +67,9 @@ void main() {
     });
 
     testWidgets('MindMapWidget 콜백 테스트', (WidgetTester tester) async {
-      const testData = MindMapData(
+      final testData = MindMapData(
         id: 'callback_root',
-        title: 'Callback Root',
+        content: const Text('Callback Root'),
         description: 'Root for callback test',
       );
 
@@ -102,16 +102,18 @@ void main() {
 
   group('MindMapData Tests', () {
     test('MindMapData 생성 및 속성 테스트', () {
-      const data = MindMapData(
+      final data = MindMapData(
         id: 'test_id',
-        title: 'Test Title',
+        content: const Text('Test Title'),
         description: 'Test Description',
         color: Colors.blue,
-        children: [MindMapData(id: 'child_id', title: 'Child Title')],
+        children: [
+          MindMapData(id: 'child_id', content: const Text('Child Title')),
+        ],
       );
 
       expect(data.id, equals('test_id'));
-      expect(data.title, equals('Test Title'));
+      expect(data.content, isA<Text>());
       expect(data.description, equals('Test Description'));
       expect(data.color, equals(Colors.blue));
       expect(data.children.length, equals(1));
@@ -119,19 +121,20 @@ void main() {
     });
 
     test('MindMapData copyWith 테스트', () {
-      const original = MindMapData(
+      final original = MindMapData(
         id: 'original_id',
-        title: 'Original Title',
+        content: const Text('Original Title'),
         description: 'Original Description',
       );
 
       final copied = original.copyWith(
-        title: 'New Title',
+        content: const Text('New Title'),
         description: 'New Description',
       );
 
       expect(copied.id, equals('original_id')); // 변경되지 않음
-      expect(copied.title, equals('New Title')); // 변경됨
+      expect(copied.content, isA<Text>()); // 변경됨
+      expect((copied.content as Text).data, equals('New Title'));
       expect(copied.description, equals('New Description')); // 변경됨
     });
   });
@@ -169,11 +172,6 @@ void main() {
       expect(style.getNodeSize(0), equals(80.0)); // 루트
       expect(style.getNodeSize(1), equals(60.0)); // 1차 자식
       expect(style.getNodeSize(2), equals(45.0)); // 리프
-
-      // 텍스트 크기 테스트
-      expect(style.getTextSize(0), equals(14.0)); // 루트
-      expect(style.getTextSize(1), equals(12.0)); // 1차 자식
-      expect(style.getTextSize(2), equals(10.0)); // 리프
 
       // 기본 색상 테스트
       expect(style.getDefaultNodeColor(0), isA<Color>());

@@ -5,11 +5,8 @@ class MindMapData {
   /// 노드의 고유 식별자
   final String id;
 
-  /// 노드의 제목
-  final String title;
-
-  /// Align text
-  final TextAlign textAlign;
+  /// 노드의 컨텐츠 위젯
+  final Widget content;
 
   /// 노드의 상세 설명
   final String description;
@@ -20,14 +17,8 @@ class MindMapData {
   /// 노드의 색상 (null이면 기본 색상 사용)
   final Color? color;
 
-  /// 노드의 텍스트 색상 (null이면 기본 색상 사용)
-  final Color? textColor;
-
   /// 노드의 테두리 색상 (null이면 기본 색상 사용)
   final Color? borderColor;
-
-  /// 노드의 텍스트 스타일 (null이면 기본 스타일 사용)
-  final TextStyle? textStyle;
 
   /// 노드의 크기 (null이면 레벨에 따른 기본 크기 사용)
   final Size? size;
@@ -37,14 +28,11 @@ class MindMapData {
 
   const MindMapData({
     required this.id,
-    required this.title,
+    required this.content,
     this.description = '',
     this.children = const [],
     this.color,
-    this.textColor,
-    this.textAlign = TextAlign.center,
     this.borderColor,
-    this.textStyle,
     this.size,
     this.customData,
   });
@@ -52,27 +40,21 @@ class MindMapData {
   /// 데이터 복사를 위한 copyWith 메소드
   MindMapData copyWith({
     String? id,
-    String? title,
+    Widget? content,
     String? description,
     List<MindMapData>? children,
     Color? color,
-    Color? textColor,
-    TextAlign? textAlign,
     Color? borderColor,
-    TextStyle? textStyle,
     Size? size,
     Map<String, dynamic>? customData,
   }) {
     return MindMapData(
       id: id ?? this.id,
-      title: title ?? this.title,
+      content: content ?? this.content,
       description: description ?? this.description,
       children: children ?? this.children,
       color: color ?? this.color,
-      textColor: textColor ?? this.textColor,
-      textAlign: textAlign ?? this.textAlign,
       borderColor: borderColor ?? this.borderColor,
-      textStyle: textStyle ?? this.textStyle,
       size: size ?? this.size,
       customData: customData ?? this.customData,
     );
@@ -84,14 +66,11 @@ class MindMapData {
 
     return other is MindMapData &&
         other.id == id &&
-        other.title == title &&
+        other.content == content &&
         other.description == description &&
         other.children == children &&
         other.color == color &&
-        other.textColor == textColor &&
-        other.textAlign == textAlign &&
         other.borderColor == borderColor &&
-        other.textStyle == textStyle &&
         other.size == size &&
         other.customData == customData;
   }
@@ -100,14 +79,11 @@ class MindMapData {
   int get hashCode {
     return Object.hash(
       id,
-      title,
+      content,
       description,
       children,
       color,
-      textColor,
-      textAlign,
       borderColor,
-      textStyle,
       size,
       customData,
     );
@@ -115,7 +91,7 @@ class MindMapData {
 
   @override
   String toString() {
-    return 'MindMapData(id: $id, title: $title, children:  [36m${children.length} [0m)';
+    return 'MindMapData(id: $id, children:  [36m${children.length} [0m)';
   }
 
   /// Returns a flat list of all nodes in pre-order traversal (self, then children)
@@ -128,7 +104,11 @@ class MindMapData {
   }
 
   /// Recursively update a node in the tree.
-  static MindMapData updateNodeInTree(MindMapData root, String nodeId, MindMapData Function(MindMapData) updater) {
+  static MindMapData updateNodeInTree(
+    MindMapData root,
+    String nodeId,
+    MindMapData Function(MindMapData) updater,
+  ) {
     if (root.id == nodeId) {
       return updater(root);
     }

@@ -3,7 +3,6 @@ import '../enums/mind_map_layout.dart';
 import '../enums/node_shape.dart';
 import '../enums/mind_map_type.dart';
 import '../models/mind_map_node.dart';
-import 'dart:math' as math;
 
 /// 마인드맵의 전체적인 스타일을 정의하는 클래스 / Class that defines the overall style of the mind map
 class MindMapStyle {
@@ -34,11 +33,8 @@ class MindMapStyle {
   /// 연결선 스타일 (직선 또는 곡선) / Connection line style (straight or curved)
   final bool useCustomCurve;
 
-  /// 기본 노드 색상들 (레벨별로 사용) / Default node colors (used by level)
+  /// 기본 노드 색상들 (레벨별로 사용) / Default node colors  /// 기본 노드 색상 팔레트
   final List<Color> defaultNodeColors;
-
-  /// 기본 텍스트 스타일 / Default text style
-  final TextStyle defaultTextStyle;
 
   /// 루트 노드 크기 / Root node size
   final double rootNodeSize;
@@ -119,9 +115,6 @@ class MindMapStyle {
   )?
   nodeBuilder;
 
-  /// 텍스트 방향 / Text direction
-  final TextDirection? textDirection;
-
   const MindMapStyle({
     this.mindMapType = MindMapType.default_,
     this.layout = MindMapLayout.right,
@@ -146,11 +139,6 @@ class MindMapStyle {
       Color(0xFF06B6D4),
       Color(0xFFF97316),
     ],
-    this.defaultTextStyle = const TextStyle(
-      color: Colors.white,
-      fontWeight: FontWeight.w600,
-      height: 1.1,
-    ),
     this.rootNodeSize = 80.0,
     this.primaryNodeSize = 60.0,
     this.leafNodeSize = 45.0,
@@ -175,7 +163,6 @@ class MindMapStyle {
     this.minCustomNodeHeight = 40.0,
     this.enableCustomNodeAutoSizing = true,
     this.nodeBuilder,
-    this.textDirection,
   });
 
   /// 스타일 복사를 위한 copyWith 메소드 / copyWith method for style copying
@@ -190,7 +177,6 @@ class MindMapStyle {
     double? connectionWidth,
     bool? useCustomCurve,
     List<Color>? defaultNodeColors,
-    TextStyle? defaultTextStyle,
     double? rootNodeSize,
     double? primaryNodeSize,
     double? leafNodeSize,
@@ -222,7 +208,6 @@ class MindMapStyle {
       VoidCallback,
     )?
     nodeBuilder,
-    TextDirection? textDirection,
   }) {
     return MindMapStyle(
       mindMapType: mindMapType ?? this.mindMapType,
@@ -235,7 +220,6 @@ class MindMapStyle {
       connectionWidth: connectionWidth ?? this.connectionWidth,
       useCustomCurve: useCustomCurve ?? this.useCustomCurve,
       defaultNodeColors: defaultNodeColors ?? this.defaultNodeColors,
-      defaultTextStyle: defaultTextStyle ?? this.defaultTextStyle,
       rootNodeSize: rootNodeSize ?? this.rootNodeSize,
       primaryNodeSize: primaryNodeSize ?? this.primaryNodeSize,
       leafNodeSize: leafNodeSize ?? this.leafNodeSize,
@@ -262,7 +246,6 @@ class MindMapStyle {
       enableCustomNodeAutoSizing:
           enableCustomNodeAutoSizing ?? this.enableCustomNodeAutoSizing,
       nodeBuilder: nodeBuilder ?? this.nodeBuilder,
-      textDirection: textDirection ?? this.textDirection,
     );
   }
 
@@ -274,7 +257,7 @@ class MindMapStyle {
   }
 
   /// 커스텀 노드 크기를 제한 범위 내로 조정 / Adjust custom node size within limits
-  Size adjustCustomNodeSize(Size originalSize, {String? title, int? level}) {
+  Size adjustCustomNodeSize(Size originalSize) {
     if (!enableCustomNodeAutoSizing) {
       return originalSize;
     }
@@ -289,41 +272,8 @@ class MindMapStyle {
       maxCustomNodeHeight,
     );
 
-    // 텍스트 길이에 따른 동적 조정
-    if (title != null) {
-      final textLength = title.length;
-      final fontSize =
-          level == 0
-              ? 18.0
-              : level == 1
-              ? 15.0
-              : 12.0;
-      final estimatedTextWidth = textLength * fontSize * 0.6;
-      final minWidthForText = estimatedTextWidth + 20; // 패딩 포함
-
-      if (adjustedWidth < minWidthForText) {
-        adjustedWidth = minWidthForText.clamp(
-          minCustomNodeWidth,
-          maxCustomNodeWidth,
-        );
-      }
-    }
-
     return Size(adjustedWidth, adjustedHeight);
   }
-
-  // /// 마크맵 스타일 마인드맵을 위한 전용 스타일 생성 / Create dedicated style for markmap type mind map
-  // MindMapStyle getMarkmapStyle() {
-  //   return copyWith(
-  //     mindMapType: MindMapType.markmap,
-  //     connectionWidth: 2.0,
-  //     connectionColor: Colors.grey[600]!,
-  //     useCustomCurve: true,
-  //     backgroundColor: const Color(0xFFF8FAFC), // 연한 회색 배경
-  //     animationDuration: const Duration(milliseconds: 800),
-  //     animationCurve: Curves.easeOutCubic,
-  //   );
-  // }
 
   /// 노드 레벨에 따른 기본 색상을 반환 / Returns default color based on node level
   Color getDefaultNodeColor(int level) {
@@ -337,111 +287,18 @@ class MindMapStyle {
     return 10.0;
   }
 
-  /// 텍스트 내용에 따른 동적 노드 크기 계산 / Calculate dynamic node size based on text content
-  Size calculateNodeSize(String text, int level, {TextStyle? customTextStyle}) {
-    if (!enableAutoSizing) {
-      final size = getNodeSize(level);
-      return Size(size, size);
-    }
-
-    final textStyle =
-        customTextStyle ??
-        defaultTextStyle.copyWith(fontSize: getTextSize(level));
-
-    // TextPainter를 사용해서 실제 텍스트 크기 측정 / Measure actual text size using TextPainter
-
-    final textPainter = TextPainter(
-      text: TextSpan(text: text, style: textStyle),
-      textDirection: textDirection ?? TextDirection.ltr,
-      maxLines: null,
-    );
-    textPainter.layout(maxWidth: maxNodeWidth - textPadding.horizontal);
-
-    final textWidth = textPainter.width + 30;
-    final textHeight = textPainter.height + 30;
-
-    // 패딩을 포함한 최종 크기 계산 / Calculate final size including padding
-    double nodeWidth = textWidth + textPadding.horizontal;
-    double nodeHeight = textHeight + textPadding.vertical;
-
-    // 최소/최대 크기 제약 적용 / Apply min/max size constraints
-    nodeWidth = nodeWidth.clamp(minNodeWidth, maxNodeWidth);
-    nodeHeight = nodeHeight.clamp(minNodeHeight, double.infinity);
-
-    // 레벨별 최소 크기 보장 / Ensure minimum size per level
-    final minSize = getNodeSize(level);
-    nodeWidth = nodeWidth.clamp(minSize * 0.8, double.infinity);
-    nodeHeight = nodeHeight.clamp(minSize * 0.6, double.infinity);
-
-    return Size(nodeWidth, nodeHeight);
-  }
-
-  /// 노드의 실제 크기를 반환 (Size가 있으면 그것을 사용, 없으면 동적 계산) / Returns actual node size (use custom size if available, otherwise calculate dynamically)
-  Size getActualNodeSize(
-    String text,
-    int level, {
-    Size? customSize,
-    TextStyle? customTextStyle,
-  }) {
-    // 기본 텍스트 스타일 결정
-    final baseTextStyle =
-        customTextStyle ??
-        defaultTextStyle.copyWith(fontSize: getTextSize(level));
-
-    // 텍스트 크기 정확히 계산
-    final textPainter = TextPainter(
-      text: TextSpan(text: text, style: baseTextStyle),
-      textDirection: textDirection ?? TextDirection.ltr,
-      maxLines: 3, // 최대 3줄로 제한
-    );
-
-    // 최대 너비 제약 설정
-    final maxTextWidth = maxNodeWidth - textPadding.horizontal;
-    textPainter.layout(maxWidth: maxTextWidth);
-
-    // 텍스트 크기 + 패딩 계산
-    final textWidth = textPainter.width;
-    final textHeight = textPainter.height;
-
-    // 최소 크기 계산 (텍스트 + 패딩)
-    final minWidth = textWidth + textPadding.horizontal;
-    final minHeight = textHeight + textPadding.vertical;
-
+  /// 노드의 실제 크기를 반환 (Size가 있으면 그것을 사용, 없으면 기본 크기 사용) / Returns actual node size (use custom size if available, otherwise use default size)
+  Size getActualNodeSize(int level, {Size? customSize}) {
     // 커스텀 크기가 있는 경우
     if (customSize != null) {
-      if (!enableAutoSizing) {
-        // 자동 크기 조정이 비활성화된 경우 커스텀 크기 사용
-        return Size(
-          customSize.width.clamp(minCustomNodeWidth, maxCustomNodeWidth),
-          customSize.height.clamp(minCustomNodeHeight, maxCustomNodeHeight),
-        );
-      } else {
-        // 자동 크기 조정이 활성화된 경우 더 큰 값 사용
-        final adjustedWidth = math.max(customSize.width, minWidth);
-        final adjustedHeight = math.max(customSize.height, minHeight);
-
-        return Size(
-          adjustedWidth.clamp(minCustomNodeWidth, maxCustomNodeWidth),
-          adjustedHeight.clamp(minCustomNodeHeight, maxCustomNodeHeight),
-        );
-      }
+      return adjustCustomNodeSize(customSize);
     }
 
-    // 커스텀 크기가 없는 경우 동적 계산
-    final calculatedSize = calculateNodeSize(
-      text,
-      level,
-      customTextStyle: customTextStyle,
-    );
-
-    // 레벨별 최소 크기 보장
-    final levelMinSize = getNodeSize(level);
-    final finalWidth = math.max(calculatedSize.width, levelMinSize * 0.8);
-    final finalHeight = math.max(calculatedSize.height, levelMinSize * 0.6);
-
+    // 커스텀 크기가 없는 경우 레벨별 기본 크기 사용
+    final levelSize = getNodeSize(level);
     return Size(
-      finalWidth.clamp(minNodeWidth, maxNodeWidth),
-      finalHeight.clamp(minNodeHeight, double.infinity),
+      levelSize.clamp(minNodeWidth, maxNodeWidth),
+      (levelSize * 0.6).clamp(minNodeHeight, double.infinity),
     );
   }
 }

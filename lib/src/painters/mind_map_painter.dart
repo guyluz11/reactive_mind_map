@@ -58,10 +58,8 @@ class MindMapPainter extends CustomPainter {
     final distance = (child.position - parent.position).distance;
 
     final parentSize = style.getActualNodeSize(
-      parent.title,
       parent.level,
       customSize: parent.size,
-      customTextStyle: parent.textStyle,
     );
 
     final minDistance = parentSize.width / 2 + 20;
@@ -82,10 +80,8 @@ class MindMapPainter extends CustomPainter {
           ..style = PaintingStyle.stroke;
 
     final childSize = style.getActualNodeSize(
-      child.title,
       child.level,
       customSize: child.size,
-      customTextStyle: child.textStyle,
     );
 
     final angle = math.atan2(
@@ -130,63 +126,6 @@ class MindMapPainter extends CustomPainter {
       canvas.drawLine(startPoint, endPoint, paint);
     }
   }
-
-  // void _drawSmoothCollapsingCurve(
-  //   Canvas canvas,
-  //   MindMapNode parent,
-  //   MindMapNode child,
-  //   Paint paint,
-  // ) {
-  //   final path = Path();
-  //   final connectionPoints = _getConnectionPoints(parent, child);
-  //   final startPoint = connectionPoints['start']!;
-  //   final endPoint = connectionPoints['end']!;
-
-  //   path.moveTo(startPoint.dx, startPoint.dy);
-
-  //   final distance = (child.position - parent.position).distance;
-  //   final maxDistance = 200.0;
-  //   final progress = (distance / maxDistance).clamp(0.0, 1.0);
-
-  //   final controlOffset = 40.0 * progress;
-
-  //   final direction = _getConnectionDirection(startPoint, endPoint);
-  //   Offset control1, control2;
-
-  //   switch (direction) {
-  //     case 'right':
-  //       control1 = Offset(startPoint.dx + controlOffset, startPoint.dy);
-  //       control2 = Offset(endPoint.dx - controlOffset * 0.5, endPoint.dy);
-  //       break;
-  //     case 'left':
-  //       control1 = Offset(startPoint.dx - controlOffset, startPoint.dy);
-  //       control2 = Offset(endPoint.dx + controlOffset * 0.5, endPoint.dy);
-  //       break;
-  //     case 'top':
-  //       control1 = Offset(startPoint.dx, startPoint.dy - controlOffset);
-  //       control2 = Offset(endPoint.dx, endPoint.dy + controlOffset * 0.5);
-  //       break;
-  //     case 'bottom':
-  //       control1 = Offset(startPoint.dx, startPoint.dy + controlOffset);
-  //       control2 = Offset(endPoint.dx, endPoint.dy - controlOffset * 0.5);
-  //       break;
-  //     default:
-  //       final midPoint = Offset.lerp(startPoint, endPoint, 0.5)!;
-  //       control1 = Offset.lerp(startPoint, midPoint, 0.5)!;
-  //       control2 = Offset.lerp(midPoint, endPoint, 0.5)!;
-  //   }
-
-  //   path.cubicTo(
-  //     control1.dx,
-  //     control1.dy,
-  //     control2.dx,
-  //     control2.dy,
-  //     endPoint.dx,
-  //     endPoint.dy,
-  //   );
-
-  //   canvas.drawPath(path, paint);
-  // }
 
   /// 곡선 연결선 그리기
   void _drawCurvedConnection(
@@ -242,16 +181,12 @@ class MindMapPainter extends CustomPainter {
     MindMapNode child,
   ) {
     final parentSize = style.getActualNodeSize(
-      parent.title,
       parent.level,
       customSize: parent.size,
-      customTextStyle: parent.textStyle,
     );
     final childSize = style.getActualNodeSize(
-      child.title,
       child.level,
       customSize: child.size,
-      customTextStyle: child.textStyle,
     );
 
     Offset startPoint;
@@ -393,16 +328,12 @@ class MindMapPainter extends CustomPainter {
     Offset control1, control2;
 
     final parentSize = style.getActualNodeSize(
-      parent.title,
       parent.level,
       customSize: parent.size,
-      customTextStyle: parent.textStyle,
     );
     final childSize = style.getActualNodeSize(
-      child.title,
       child.level,
       customSize: child.size,
-      customTextStyle: child.textStyle,
     );
 
     final distance = math.sqrt(

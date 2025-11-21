@@ -37,28 +37,55 @@ class _TestScreenState extends State<TestScreen> {
   @override
   void initState() {
     super.initState();
+
     mindMapData = MindMapData(
       id: 'root',
-      title: '🎯 메인',
+      content: const Text(
+        '🎯 메인',
+        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      ),
       children: [
         MindMapData(
           id: 'node1',
-          title: '📝 노드1',
+          content: const Text(
+            'Testing this node to see if it can hangle long text or does it switch it to three dots so this is the very long text to Testing this node to see if it can hangle long text or does it switch it to three dots so this is the very long text\n\n to Testing this node to see if it can hangle long text or does it switch it  to Testing this node to see if it to three dots so this is the very long text to And this is the last line',
+          ),
           borderColor: Colors.green,
           children: [
-            MindMapData(id: 'sub1', title: '서브1', borderColor: Colors.purple),
-            MindMapData(id: 'sub2', title: '서브2'),
+            MindMapData(
+              id: 'sub1',
+              content: const Text('서브1'),
+              borderColor: Colors.purple,
+            ),
+            MindMapData(
+              id: 'sub2',
+              content: const Text(
+                'היי I am  גיא לוז.',
+                textAlign: TextAlign.right,
+              ),
+            ),
           ],
         ),
-        MindMapData(id: 'node2', title: '🎨 노드2'),
-        MindMapData(id: 'node3', title: '🔧 노드3'),
+        MindMapData(id: 'node2', content: const Text('🎨 노드2')),
+        MindMapData(id: 'node3', content: const Text('🔧 노드3')),
         MindMapData(
           id: 'node4',
-          title: '🚀 노드4',
-          children: [MindMapData(id: 'final', title: '마지막')],
+          content: const Text('🚀 노드4'),
+          children: [MindMapData(id: 'final', content: const Text('마지막'))],
         ),
       ],
     );
+  }
+
+  void _editNode(MindMapData node) {
+    // Example implementation of edit node
+    setState(() {
+      mindMapData = MindMapData.updateNodeInTree(
+        mindMapData,
+        node.id,
+        (n) => n.copyWith(content: const Text('Edited Node')),
+      );
+    });
   }
 
   @override
@@ -170,10 +197,10 @@ class _TestScreenState extends State<TestScreen> {
                 borderRadius: BorderRadius.circular(10),
                 child: MindMapWidget(
                   data: mindMapData,
-                  style: const MindMapStyle(
-                    backgroundColor: Color(0xFFF8F9FA),
+                  style: MindMapStyle(
+                    backgroundColor: const Color(0xFFF8F9FA),
                     selectedColor: Colors.red,
-                    defaultNodeColors: [
+                    defaultNodeColors: const [
                       Color(0xFF4CAF50),
                       Color(0xFF2196F3),
                       Color(0xFFFF9800),
@@ -190,9 +217,11 @@ class _TestScreenState extends State<TestScreen> {
                   isNodesCollapsed: false, // 모든 노드 펼쳐져 있음
                   nodeExpandCameraBehavior: expandBehavior,
                   onNodeTap: (node) {
-                    debugPrint('탭된 노드: ${node.title} (${node.id})');
+                    debugPrint('탭된 노드: ${node.description} (${node.id})');
                     setState(() {
-                      lastAction = '노드 탭: ${node.title}';
+                      lastAction = '노드 탭: ${node.description}';
+                      // Example of editing the tapped node
+                      _editNode(node);
                     });
                   },
                 ),
@@ -282,7 +311,7 @@ class _TestScreenState extends State<TestScreen> {
       );
       currentFocus = CameraFocus.custom;
       targetNodeId = nextNode.id;
-      lastAction = '다음 노드로 이동: ${nextNode.title}';
+      lastAction = '다음 노드로 이동: ${nextNode.description}';
     });
   }
 
@@ -296,7 +325,7 @@ class _TestScreenState extends State<TestScreen> {
     setState(() {
       currentFocus = CameraFocus.custom;
       targetNodeId = prevNode.id;
-      lastAction = '이전 노드로 이동: ${prevNode.title}';
+      lastAction = '이전 노드로 이동: ${prevNode.description}';
     });
   }
 }

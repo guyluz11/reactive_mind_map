@@ -69,8 +69,6 @@ class LineTypeMindMapPainter extends CustomPainter {
       canvas.drawCircle(position, 8, selectionPaint);
     }
 
-    _drawMarkmapText(canvas, position, node, 0);
-
     nodePositions[node.id] = position;
   }
 
@@ -102,71 +100,6 @@ class LineTypeMindMapPainter extends CustomPainter {
         1,
       );
     }
-  }
-
-  // Path _createCurvePath(Offset start, Offset end, double angle) {
-  //   final path = Path();
-  //   path.moveTo(start.dx, start.dy);
-
-  //   if (style.useCustomCurve) {
-  //     final controlDistance = 60.0;
-  //     final controlPoint1 = Offset(
-  //       start.dx + math.cos(angle) * controlDistance * 0.5,
-  //       start.dy + math.sin(angle) * controlDistance * 0.5,
-  //     );
-  //     final controlPoint2 = Offset(
-  //       end.dx - math.cos(angle) * controlDistance * 0.3,
-  //       end.dy - math.sin(angle) * controlDistance * 0.3,
-  //     );
-
-  //     path.cubicTo(
-  //       controlPoint1.dx,
-  //       controlPoint1.dy,
-  //       controlPoint2.dx,
-  //       controlPoint2.dy,
-  //       end.dx,
-  //       end.dy,
-  //     );
-  //   } else {
-  //     path.lineTo(end.dx, end.dy);
-  //   }
-
-  //   return path;
-  // }
-
-  void _drawMarkmapText(
-    Canvas canvas,
-    Offset position,
-    MindMapData node,
-    int level,
-  ) {
-    final fontSize =
-        level == 0
-            ? 18.0
-            : level == 1
-            ? 16.0
-            : 14.0;
-
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: node.title,
-        style: TextStyle(
-          color: node.textColor ?? Colors.black87,
-          fontSize: fontSize,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      textAlign: TextAlign.start,
-      textDirection: TextDirection.ltr,
-    );
-
-    textPainter.layout(maxWidth: 200);
-
-    final textOffset = Offset(
-      position.dx + 15,
-      position.dy - textPainter.height / 2,
-    );
-    textPainter.paint(canvas, textOffset);
   }
 
   void _drawMarkmapNode(
@@ -209,10 +142,6 @@ class LineTypeMindMapPainter extends CustomPainter {
 
         canvas.drawCircle(nodePosition, 7, selectionPaint);
       }
-    }
-
-    if (animationValue > 0.7) {
-      _drawMarkmapText(canvas, nodePosition, node, level);
     }
 
     nodePositions[node.id] = nodePosition;

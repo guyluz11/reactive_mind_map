@@ -59,10 +59,7 @@ class _TestScreenState extends State<TestScreen> {
             ),
             MindMapData(
               id: 'sub2',
-              content: const Text(
-                'היי I am  גיא לוז. Test test test',
-                textAlign: TextAlign.right,
-              ),
+              content: const Text('Test test test', textAlign: TextAlign.right),
             ),
           ],
         ),

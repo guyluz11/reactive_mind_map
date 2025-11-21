@@ -1,4 +1,5 @@
 export 'src/models/mind_map_data.dart';
+export 'src/models/mind_map_node.dart';
 export 'src/models/mind_map_style.dart';
 export 'src/enums/mind_map_layout.dart';
 export 'src/enums/node_shape.dart';

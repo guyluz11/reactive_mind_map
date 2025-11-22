@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Camera Focus 테스트',
+      title: 'Camera Focus Test',
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
       home: const TestScreen(),
     );
@@ -28,10 +28,10 @@ class TestScreen extends StatefulWidget {
 class _TestScreenState extends State<TestScreen> {
   CameraFocus currentFocus = CameraFocus.rootNode;
   String? targetNodeId;
-  String lastAction = '시작';
+  String lastAction = 'Start';
   NodeExpandCameraBehavior expandBehavior = NodeExpandCameraBehavior.none;
 
-  // 간단한 테스트 데이터
+  // Simple test data
   late MindMapData mindMapData;
 
   @override
@@ -41,13 +41,13 @@ class _TestScreenState extends State<TestScreen> {
     mindMapData = MindMapData(
       id: 'root',
       content: const Text(
-        '🎯 메인',
+        '🎯 Main',
         style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
       ),
       children: [
         MindMapData(
           id: 'node1',
-          content: const Text('Test test'),
+          content: const Text('Tests das das d"'),
           borderColor: Colors.green,
           children: [
             MindMapData(
@@ -62,18 +62,27 @@ class _TestScreenState extends State<TestScreen> {
                 child: Container(
                   margin: const EdgeInsets.all(50 / 2),
 
-                  child: const Text('sdasd asd as', textAlign: TextAlign.right),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      labelText: 'Enter your name',
+                      hintText: 'John Doe',
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      debugPrint('User typed: $value');
+                    },
+                  ),
                 ),
               ),
             ),
           ],
         ),
-        MindMapData(id: 'node2', content: const Text('🎨 노드2')),
-        MindMapData(id: 'node3', content: const Text('🔧 노드3')),
+        MindMapData(id: 'node2', content: const Text('🎨 Node 2')),
+        MindMapData(id: 'node3', content: const Text('🔧 Node 3')),
         MindMapData(
           id: 'node4',
-          content: const Text('🚀 노드4'),
-          children: [MindMapData(id: 'final', content: const Text('마지막'))],
+          content: const Text('🚀 Node 4'),
+          children: [MindMapData(id: 'final', content: const Text('Final'))],
         ),
       ],
     );
@@ -94,28 +103,28 @@ class _TestScreenState extends State<TestScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('카메라 포커스 테스트'),
+        title: const Text('Camera Focus Test'),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
       body: Column(
         children: [
-          // 간단한 버튼들
+          // Simple buttons
           Container(
             padding: const EdgeInsets.all(16),
             child: Wrap(
               spacing: 8,
               children: [
                 _buildButton(
-                  '🎯 루트',
+                  '🎯 Root',
                   () => _focusToNode(CameraFocus.rootNode, null),
                 ),
                 _buildButton(
-                  '🔍 전체보기',
+                  '🔍 Fit All',
                   () => _focusToNode(CameraFocus.allNodes, null),
                 ),
                 _buildButton(
-                  '📝 노드1',
+                  '📝 Node 1',
                   () => _focusToNode(CameraFocus.custom, 'node1'),
                 ),
                 _buildButton(
@@ -123,47 +132,47 @@ class _TestScreenState extends State<TestScreen> {
                   () => _focusToNode(CameraFocus.custom, 'sub1'),
                 ),
                 _buildButton(
-                  '마지막',
+                  'Final',
                   () => _focusToNode(CameraFocus.custom, 'final'),
                 ),
                 _buildButton(
-                  '🍃 첫리프',
+                  '🍃 First Leaf',
                   () => _focusToNode(CameraFocus.firstLeaf, null),
                 ),
                 // Forward/Backward focus buttons
-                _buildButton('⬅️ 이전', _focusPreviousNode),
-                _buildButton('다음 ➡️', _focusNextNode),
+                _buildButton('⬅️ Prev', _focusPreviousNode),
+                _buildButton('Next ➡️', _focusNextNode),
               ],
             ),
           ),
 
-          // 🆕 노드 확장 동작 선택
+          // 🆕 Select node expand behavior
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  '📂 노드 확장 시 카메라 동작:',
+                  '📂 Camera Behavior on Expand:',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Wrap(
                   spacing: 4,
                   children: [
                     _buildExpandBehaviorButton(
-                      '❌ 이동없음',
+                      '❌ None',
                       NodeExpandCameraBehavior.none,
                     ),
                     _buildExpandBehaviorButton(
-                      '🎯 클릭노드',
+                      '🎯 Clicked Node',
                       NodeExpandCameraBehavior.focusClickedNode,
                     ),
                     _buildExpandBehaviorButton(
-                      '👶 자식들만',
+                      '👶 Children Only',
                       NodeExpandCameraBehavior.fitExpandedChildren,
                     ),
                     _buildExpandBehaviorButton(
-                      '🌳 전체트리',
+                      '🌳 Subtree',
                       NodeExpandCameraBehavior.fitExpandedSubtree,
                     ),
                   ],
@@ -172,19 +181,19 @@ class _TestScreenState extends State<TestScreen> {
             ),
           ),
 
-          // 상태 표시
+          // Status display
           Container(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                Text('현재 포커스: ${_getFocusName()}'),
-                Text('마지막 동작: $lastAction'),
-                Text('확장 동작: ${_getExpandBehaviorName()}'),
+                Text('Current Focus: ${_getFocusName()}'),
+                Text('Last Action: $lastAction'),
+                Text('Expand Behavior: ${_getExpandBehaviorName()}'),
               ],
             ),
           ),
 
-          // 마인드맵
+          // Mind Map
           Expanded(
             child: Container(
               margin: const EdgeInsets.all(16),
@@ -196,32 +205,28 @@ class _TestScreenState extends State<TestScreen> {
                 borderRadius: BorderRadius.circular(10),
                 child: MindMapWidget(
                   data: mindMapData,
-                  style: MindMapStyle(
-                    backgroundColor: const Color(0xFFF8F9FA),
-                    selectedColor: Colors.red,
-                    defaultNodeColors: const [
-                      Color(0xFF2196F3),
-                      Color(0xFFFF9800),
-                      Color(0xFFE91E63),
-                    ],
+                  style: const MindMapStyle(
                     levelSpacing: 120,
                     nodeMargin: 15,
+                    enableAutoSizing: true,
                   ),
                   cameraFocus: currentFocus,
-                  // focusMargin: EdgeInsets.all(0),
+                  focusNodeId: targetNodeId,
+                  focusAnimation: const Duration(), // Longer animation
+                  isNodesCollapsed: false, // All nodes expanded
                   nodeExpandCameraBehavior:
                       NodeExpandCameraBehavior.fitExpandedSubtree,
-                  focusNodeId: targetNodeId,
-                  focusAnimation: const Duration(), // 더 긴 애니메이션
-                  isNodesCollapsed: false, // 모든 노드 펼쳐져 있음
                   onNodeTap: (node) {
-                    debugPrint('탭된 노드: ${node.description} (${node.id})');
+                    debugPrint('Tapped Node: ${node.description} (${node.id})');
                     setState(() {
-                      lastAction = '노드 탭: ${node.description}';
+                      lastAction = 'Node Tapped: ${node.description}';
                       // Example of editing the tapped node
                       _editNode(node);
                     });
                   },
+                  centerOffset: const Offset(0, 0),
+                  autoCenterOnScreen: true,
+                  debugMode: true,
                 ),
               ),
             ),
@@ -248,24 +253,24 @@ class _TestScreenState extends State<TestScreen> {
       currentFocus = focus;
       targetNodeId = nodeId;
       lastAction =
-          '${_getFocusName()} ${nodeId != null ? '→ $nodeId' : ''}로 이동';
+          'Move to ${_getFocusName()} ${nodeId != null ? '→ $nodeId' : ''}';
     });
   }
 
   String _getFocusName() {
     switch (currentFocus) {
       case CameraFocus.rootNode:
-        return '루트';
+        return 'Root';
       case CameraFocus.allNodes:
-        return '전체보기';
+        return 'Fit All';
       case CameraFocus.fitAllNodes:
-        return '전체 맞춤';
+        return 'Fit All Nodes';
       case CameraFocus.custom:
-        return '커스텀';
+        return 'Custom';
       case CameraFocus.center:
-        return '중앙';
+        return 'Center';
       case CameraFocus.firstLeaf:
-        return '첫 리프';
+        return 'First Leaf';
     }
   }
 
@@ -287,13 +292,13 @@ class _TestScreenState extends State<TestScreen> {
   String _getExpandBehaviorName() {
     switch (expandBehavior) {
       case NodeExpandCameraBehavior.none:
-        return '❌ 이동없음';
+        return '❌ None';
       case NodeExpandCameraBehavior.focusClickedNode:
-        return '🎯 클릭노드';
+        return '🎯 Clicked Node';
       case NodeExpandCameraBehavior.fitExpandedChildren:
-        return '👶 자식들만';
+        return '👶 Children Only';
       case NodeExpandCameraBehavior.fitExpandedSubtree:
-        return '🌳 전체트리';
+        return '🌳 Subtree';
     }
   }
 
@@ -311,7 +316,7 @@ class _TestScreenState extends State<TestScreen> {
       );
       currentFocus = CameraFocus.custom;
       targetNodeId = nextNode.id;
-      lastAction = '다음 노드로 이동: ${nextNode.description}';
+      lastAction = 'Move to next node: ${nextNode.description}';
     });
   }
 
@@ -325,7 +330,7 @@ class _TestScreenState extends State<TestScreen> {
     setState(() {
       currentFocus = CameraFocus.custom;
       targetNodeId = prevNode.id;
-      lastAction = '이전 노드로 이동: ${prevNode.description}';
+      lastAction = 'Move to prev node: ${prevNode.description}';
     });
   }
 }

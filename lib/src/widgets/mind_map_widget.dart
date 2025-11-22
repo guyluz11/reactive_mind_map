@@ -12,7 +12,7 @@ import '../models/mind_map_style.dart';
 // import '../enums/mind_map_type.dart';
 import '../painters/mind_map_painter.dart';
 import 'measure_size.dart';
-// import 'markmap_widget.dart'; // 개발 중
+// import 'markmap_widget.dart'; // in development
 
 /// Customizable mind map widget
 class MindMapWidget extends StatefulWidget {
@@ -348,7 +348,7 @@ class MindMapWidgetState extends State<MindMapWidget>
 
     // Extra margin for overflow protection
     final safetyMarginX = 100.0;
-    final safetyMarginY = 150.0; // 바텀 오버플로우 방지를 위해 더 큰 값
+    final safetyMarginY = 150.0; // Larger value to prevent bottom overflow
     return Size(finalWidth + safetyMarginX, finalHeight + safetyMarginY);
   }
 
@@ -804,7 +804,7 @@ class MindMapWidgetState extends State<MindMapWidget>
     }
   }
 
-  /// 아래쪽 방향 레이아웃 / Bottom direction layout
+  /// Bottom direction layout
   void _assignBottomLayout(MindMapNode parent, int level) {
     final dynamicSpacing = _calculateDynamicSpacing(parent, level);
     final y = parent.targetPosition.dy + dynamicSpacing;
@@ -813,7 +813,7 @@ class MindMapWidgetState extends State<MindMapWidget>
       (sum, child) => sum + child.subtreeWidth,
     );
 
-    // 자식 노드들 사이의 추가 간격 적용
+    // Apply additional spacing between child nodes
     final childGap = _calculateChildGap(parent.children);
     totalWidth += childGap * (parent.children.length - 1);
 
@@ -831,7 +831,7 @@ class MindMapWidgetState extends State<MindMapWidget>
     }
   }
 
-  /// 원형 방향 레이아웃 / Radial layout
+  /// Radial layout
   void _assignRadialLayout(MindMapNode parent, int level) {
     final dynamicSpacing = _calculateDynamicSpacing(parent, level);
     final radius = dynamicSpacing * 0.8;
@@ -850,7 +850,7 @@ class MindMapWidgetState extends State<MindMapWidget>
     }
   }
 
-  /// 수평 방향 레이아웃 (좌우로 분할) / Horizontal layout (split left-right)
+  /// Horizontal layout (split left-right)
   void _assignHorizontalLayout(MindMapNode parent, int level) {
     if (level == 0) {
       final leftChildren =
@@ -875,7 +875,7 @@ class MindMapWidgetState extends State<MindMapWidget>
     }
   }
 
-  /// 수직 방향 레이아웃 (위아래로 분할) / Vertical layout (split top-bottom)
+  /// Vertical layout (split top-bottom)
   void _assignVerticalLayout(MindMapNode parent, int level) {
     if (level == 0) {
       final topChildren =
@@ -900,7 +900,7 @@ class MindMapWidgetState extends State<MindMapWidget>
     }
   }
 
-  /// 한쪽으로 자식 노드들 배치 / Assign children to one side
+  /// Assign children to one side
   void _assignChildrenToSide(
     List<MindMapNode> children,
     MindMapNode parent,
@@ -914,7 +914,7 @@ class MindMapWidgetState extends State<MindMapWidget>
       (sum, child) => sum + child.subtreeHeight,
     );
 
-    // 자식 노드들 사이의 추가 간격 적용
+    // Apply additional spacing between child nodes
     final childGap = _calculateChildGap(children);
     totalHeight += childGap * (children.length - 1);
 
@@ -931,7 +931,7 @@ class MindMapWidgetState extends State<MindMapWidget>
     }
   }
 
-  /// 위아래로 자식 노드들 배치 / Assign children vertically
+  /// Assign children vertically
   void _assignChildrenVertically(
     List<MindMapNode> children,
     MindMapNode parent,
@@ -945,7 +945,7 @@ class MindMapWidgetState extends State<MindMapWidget>
       (sum, child) => sum + child.subtreeWidth,
     );
 
-    // 자식 노드들 사이의 추가 간격 적용
+    // Apply additional spacing between child nodes
     final childGap = _calculateChildGap(children);
     totalWidth += childGap * (children.length - 1);
 
@@ -962,11 +962,11 @@ class MindMapWidgetState extends State<MindMapWidget>
     }
   }
 
-  /// 자식 노드들 사이의 간격 계산 / Calculate gap between child nodes
+  /// Calculate gap between child nodes
   double _calculateChildGap(List<MindMapNode> children) {
     if (children.isEmpty) return 0.0;
 
-    // 자식 노드들의 평균 크기 계산
+    // Calculate average size of child nodes
     double avgNodeSize = 0.0;
     for (var child in children) {
       final childSize = widget.style.getActualNodeSize(
@@ -977,18 +977,18 @@ class MindMapWidgetState extends State<MindMapWidget>
     }
     avgNodeSize /= children.length;
 
-    // 기본 간격 + 노드 크기 기반 간격
+    // Default spacing + node size based spacing
     final baseGap = widget.style.nodeMargin;
     final sizeBasedGap = avgNodeSize * 0.3;
     final childCountFactor = math.min(
       2.0,
       children.length * 0.1,
-    ); // 자식이 많을수록 간격 증가 (최대 2배)
+    ); // Spacing increases with more children (max 2x)
 
     return (baseGap + sizeBasedGap) * childCountFactor;
   }
 
-  /// 노드 토글 / Toggle node
+  /// Toggle node
   void toggleNode(MindMapNode node) {
     if (node.children.isEmpty || !mounted) return;
 
@@ -1094,7 +1094,7 @@ class MindMapWidgetState extends State<MindMapWidget>
       });
     }
 
-    // 🎯 노드 확장 시 카메라 동작 설정에 따라 처리
+    // Handle camera behavior on node expand based on settings
     _handleNodeExpandCamera(node);
 
     final originalData = _findOriginalData(node.id);
@@ -1102,7 +1102,7 @@ class MindMapWidgetState extends State<MindMapWidget>
       widget.onNodeExpandChanged?.call(originalData, node.isExpanded);
     }
 
-    // 🎯 토글 완료 후 플래그 리셋 (다음 프레임에서)
+    // Reset toggle flag after completion (in next frame)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _isTogglingNode = false;
@@ -1110,22 +1110,22 @@ class MindMapWidgetState extends State<MindMapWidget>
     });
   }
 
-  /// 노드 확장 시 카메라 동작 처리 / Handle camera behavior on node expand
+  /// Handle camera behavior on node expand
   void _handleNodeExpandCamera(MindMapNode node) {
     if (!mounted || !(widget.viewerOptions?.enablePanAndZoom ?? true)) return;
 
     switch (widget.nodeExpandCameraBehavior) {
       case NodeExpandCameraBehavior.none:
-        // 카메라 이동 없음
+        // No camera movement
         break;
 
       case NodeExpandCameraBehavior.focusClickedNode:
-        // 클릭한 노드로 포커스
+        // Focus on clicked node
         _focusOnNodeById(node.id);
         break;
 
       case NodeExpandCameraBehavior.fitExpandedChildren:
-        // 새로 펼쳐진 자식 노드들만 보이도록 조정
+        // Adjust to show only newly expanded child nodes
         if (node.isExpanded && node.children.isNotEmpty) {
           _fitNodesToView(node.children);
         } else {
@@ -1134,13 +1134,13 @@ class MindMapWidgetState extends State<MindMapWidget>
         break;
 
       case NodeExpandCameraBehavior.fitExpandedSubtree:
-        // 펼쳐진 전체 서브트리를 보이도록 조정
+        // Adjust to show entire expanded subtree
         _fitSubtreeToView(node);
         break;
     }
   }
 
-  /// 노드 ID로 카메라 포커스 (기존 CameraFocus 시스템 활용)
+  /// Focus camera on node by ID (using existing CameraFocus system)
   void _focusOnNodeById(String nodeId) {
     if (!mounted || !(widget.viewerOptions?.enablePanAndZoom ?? true)) return;
 
@@ -1634,7 +1634,7 @@ class MindMapWidgetState extends State<MindMapWidget>
 
   @override
   Widget build(BuildContext context) {
-    // 마크맵 타입이면 전용 위젯 사용 (개발 중)
+    // If markmap type, use dedicated widget (in development)
     // if (widget.style.mindMapType == MindMapType.markmap) {
     //   return MarkmapWidget(
     //     data: widget.data,
@@ -1650,7 +1650,7 @@ class MindMapWidgetState extends State<MindMapWidget>
     final viewerOptions =
         widget.viewerOptions ?? const InteractiveViewerOptions();
 
-    // 마인드맵 콘텐츠
+    // Mind map content
     Widget content = Container(
       width: canvasSize.width,
       height: canvasSize.height,
@@ -1665,12 +1665,12 @@ class MindMapWidgetState extends State<MindMapWidget>
       ),
     );
 
-    // 캡처 키가 있으면 RepaintBoundary로 감싸기
+    // Wrap with RepaintBoundary if capture key exists
     if (widget.captureKey != null) {
       content = RepaintBoundary(key: widget.captureKey, child: content);
     }
 
-    // InteractiveViewer가 비활성화된 경우에만 스크롤뷰 추가
+    // Add scroll view only when InteractiveViewer is disabled
     if (!viewerOptions.enablePanAndZoom) {
       content = SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -1751,7 +1751,7 @@ class MindMapWidgetState extends State<MindMapWidget>
     }
   }
 
-  /// 모든 노드 위젯 빌드 / Build all node widgets
+  /// Build all node widgets
   List<Widget> _buildAllNodes(MindMapNode node, {Set<String>? visited}) {
     visited ??= <String>{};
 
@@ -1770,27 +1770,27 @@ class MindMapWidgetState extends State<MindMapWidget>
     return widgets;
   }
 
-  /// 개별 노드 위젯 빌드 / Build individual node widget
+  /// Build individual node widget
   Widget _buildNodeWidget(MindMapNode node) {
     final isSelected = _selectedNodeId == node.id;
     final isFocused =
         widget.focusNodeId != null && widget.focusNodeId == node.id;
 
-    // 노드 크기 결정: measuredSize가 있으면 우선 사용, 없으면 스타일의 기본값 사용
-    // 단, customSize(node.size)가 있으면 그것이 최우선
+    // Determine node size: prioritize measuredSize if available, otherwise use style default
+    // However, if customSize (node.size) exists, that takes highest priority
     final calculatedSize = widget.style.getActualNodeSize(
       node.level,
       measuredSize: node.measuredSize,
     );
 
-    // 렌더링에 사용할 크기 (레이아웃 계산에 사용된 크기)
+    // Size to use for rendering (size used in layout calculation)
     final layoutSize = node.measuredSize ?? calculatedSize;
 
-    // 노드 위치 계산 (중심점 기준이므로 좌상단 좌표로 변환)
+    // Calculate node position (convert from center point to top-left coordinates)
     final nodeLeft = node.position.dx - layoutSize.width / 2;
     final nodeTop = node.position.dy - layoutSize.height / 2;
 
-    // 화면 경계 체크 (캔버스 크기 기준)
+    // Screen boundary check (based on canvas size)
     // Note: We do NOT clamp positions anymore because:
     // 1. InteractiveViewer has infinite boundary margin and Clip.none, so nodes outside bounds are visible.
     // 2. Clamping causes a mismatch between node.position (used for camera focus) and rendered position.
@@ -1808,7 +1808,7 @@ class MindMapWidgetState extends State<MindMapWidget>
     final constrainedLeft = nodeLeft;
     final constrainedTop = nodeTop;
 
-    // 스타일의 노드 빌더가 있으면 우선 사용
+    // Use style's node builder if available
     if (widget.style.nodeBuilder != null) {
       return Positioned(
         key: ValueKey('positioned_${node.id}'),
@@ -1818,7 +1818,7 @@ class MindMapWidgetState extends State<MindMapWidget>
           onChange: (size) {
             if (node.measuredSize != size) {
               node.measuredSize = size;
-              // 레이아웃 재계산 요청 (다음 프레임에 수행하여 빌드 중 setState 방지)
+              // Request layout recalculation (perform in next frame to prevent setState during build)
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (mounted) {
                   _calculateCanvasAndLayout();
@@ -1853,7 +1853,7 @@ class MindMapWidgetState extends State<MindMapWidget>
       );
     }
 
-    // 기본 노드 빌더 사용
+    // Use default node builder
     final nodeColor =
         ((isFocused || isSelected) ? widget.style.selectedColor : node.color) ??
         Colors.blue;
@@ -1872,7 +1872,7 @@ class MindMapWidgetState extends State<MindMapWidget>
         onChange: (size) {
           if (node.measuredSize != size) {
             node.measuredSize = size;
-            // 레이아웃 재계산 요청
+            // Request layout recalculation
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
                 _calculateCanvasAndLayout();

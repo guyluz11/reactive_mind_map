@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 
-/// 마인드맵 노드 데이터를 나타내는 클래스
+/// Class representing mind map node data
 class MindMapData {
-  /// 노드의 고유 식별자
+  /// Unique identifier of the node
   final String id;
 
-  /// 노드의 컨텐츠 위젯
+  /// Content widget of the node
   final Widget content;
 
-  /// 노드의 상세 설명
+  /// Detailed description of the node
   final String description;
 
-  /// 하위 노드들
+  /// Child nodes
   final List<MindMapData> children;
 
-  /// 노드의 색상 (null이면 기본 색상 사용)
+  /// Color of the node (uses default color if null)
   final Color? color;
 
-  /// 노드의 테두리 색상 (null이면 기본 색상 사용)
+  /// Border color of the node (uses default color if null)
   final Color? borderColor;
 
-  /// 사용자 정의 데이터
+  /// Custom user data
   final Map<String, dynamic>? customData;
 
   const MindMapData({
@@ -33,7 +33,7 @@ class MindMapData {
     this.customData,
   });
 
-  /// 데이터 복사를 위한 copyWith 메소드
+  /// copyWith method for copying data
   MindMapData copyWith({
     String? id,
     Widget? content,

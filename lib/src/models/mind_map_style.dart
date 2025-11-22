@@ -4,108 +4,108 @@ import '../enums/node_shape.dart';
 import '../enums/mind_map_type.dart';
 import '../models/mind_map_node.dart';
 
-/// 마인드맵의 전체적인 스타일을 정의하는 클래스 / Class that defines the overall style of the mind map
+/// Class that defines the overall style of the mind map
 class MindMapStyle {
-  /// 마인드맵 타입 / Mind map type
+  /// Mind map type
   final MindMapType mindMapType;
 
-  /// 마인드맵 레이아웃 방향 / Mind map layout direction
+  /// Mind map layout direction
   final MindMapLayout layout;
 
-  /// 노드 모양 / Node shape
+  /// Node shape
   final NodeShape nodeShape;
 
-  /// 배경색 / Background color
+  /// Background color
   final Color backgroundColor;
 
-  /// 노드 간 수평 간격 / Horizontal spacing between nodes
+  /// Horizontal spacing between nodes
   final double levelSpacing;
 
-  /// 노드 간 수직 여백 / Vertical margin between nodes
+  /// Vertical margin between nodes
   final double nodeMargin;
 
-  /// 연결선 색상 / Connection line color
+  /// Connection line color
   final Color connectionColor;
 
-  /// 연결선 두께 / Connection line thickness
+  /// Connection line thickness
   final double connectionWidth;
 
-  /// 연결선 스타일 (직선 또는 곡선) / Connection line style (straight or curved)
+  /// Connection line style (straight or curved)
   final bool useCustomCurve;
 
-  /// 기본 노드 색상들 (레벨별로 사용) / Default node colors  /// 기본 노드 색상 팔레트
+  /// Default node colors
   final List<Color> defaultNodeColors;
 
-  /// 루트 노드 크기 / Root node size
+  /// Root node size
   final double rootNodeSize;
 
-  /// 1차 자식 노드 크기 / Primary child node size
+  /// Primary child node size
   final double primaryNodeSize;
 
-  /// 리프 노드 크기 / Leaf node size
+  /// Leaf node size
   final double leafNodeSize;
 
-  /// 노드 선택 시 테두리 색상 / Border color when node is selected
+  /// Border color when node is selected
   final Color selectionBorderColor;
 
-  /// 노드 선택 시 테두리 두께 / Border thickness when node is selected
+  /// Border thickness when node is selected
   final double selectionBorderWidth;
 
-  /// 노드 선택 시 색상 / Color when node is selected
+  /// Color when node is selected
   final Color? selectedColor;
 
-  /// 노드 애니메이션 지속 시간 / Node animation duration
+  /// Node animation duration
   final Duration animationDuration;
 
-  /// 노드 애니메이션 곡선 / Node animation curve
+  /// Node animation curve
   final Curve animationCurve;
 
-  /// 노드 그림자 활성화 여부 / Whether node shadow is enabled
+  /// Whether node shadow is enabled
   final bool enableNodeShadow;
 
-  /// 노드 그림자 색상 / Node shadow color
+  /// Node shadow color
   final Color nodeShadowColor;
 
-  /// 노드 그림자 번짐 정도 / Node shadow blur radius
+  /// Node shadow blur radius
   final double nodeShadowBlurRadius;
 
-  /// 노드 그림자 퍼짐 정도 / Node shadow spread radius
+  /// Node shadow spread radius
   final double nodeShadowSpreadRadius;
 
-  /// 노드 그림자 오프셋 / Node shadow offset
+  /// Node shadow offset
   final Offset nodeShadowOffset;
 
-  /// 노드 자동 크기 조절 여부 / Whether auto-sizing for nodes is enabled
+  /// Whether auto-sizing for nodes is enabled
   final bool enableAutoSizing;
 
-  /// 최소 노드 너비 / Minimum node width
+  /// Minimum node width
   final double minNodeWidth;
 
-  /// 최대 노드 너비 / Maximum node width
+  /// Maximum node width
   final double maxNodeWidth;
 
-  /// 최소 노드 높이 / Minimum node height
+  /// Minimum node height
   final double minNodeHeight;
 
-  /// 텍스트 패딩 / Text padding
+  /// Text padding
   final EdgeInsets textPadding;
 
-  /// 커스텀 노드 최대 너비 / Maximum width for custom nodes
+  /// Maximum width for custom nodes
   final double maxCustomNodeWidth;
 
-  /// 커스텀 노드 최대 높이 / Maximum height for custom nodes
+  /// Maximum height for custom nodes
   final double maxCustomNodeHeight;
 
-  /// 커스텀 노드 최소 너비 / Minimum width for custom nodes
+  /// Minimum width for custom nodes
   final double minCustomNodeWidth;
 
-  /// 커스텀 노드 최소 높이 / Minimum height for custom nodes
+  /// Minimum height for custom nodes
   final double minCustomNodeHeight;
 
-  /// 커스텀 노드 크기 자동 조정 여부 / Whether to auto-adjust custom node size
+  /// Whether to auto-adjust custom node size
   final bool enableCustomNodeAutoSizing;
 
-  /// 노드 빌더 함수 / Node builder function
+  /// Node builder function
   final Widget Function(
     MindMapNode,
     bool,
@@ -165,7 +165,7 @@ class MindMapStyle {
     this.nodeBuilder,
   });
 
-  /// 스타일 복사를 위한 copyWith 메소드 / copyWith method for style copying
+  /// copyWith method for style copying
   MindMapStyle copyWith({
     MindMapType? mindMapType,
     MindMapLayout? layout,
@@ -249,14 +249,14 @@ class MindMapStyle {
     );
   }
 
-  /// 노드 레벨에 따른 크기를 반환 / Returns size based on node level
+  /// Returns size based on node level
   double getNodeSize(int level) {
     if (level == 0) return rootNodeSize;
     if (level == 1) return primaryNodeSize;
     return leafNodeSize;
   }
 
-  /// 커스텀 노드 크기를 제한 범위 내로 조정 / Adjust custom node size within limits
+  /// Adjust custom node size within limits
   Size adjustCustomNodeSize(Size originalSize) {
     if (!enableCustomNodeAutoSizing) {
       return originalSize;
@@ -275,19 +275,19 @@ class MindMapStyle {
     return Size(adjustedWidth, adjustedHeight);
   }
 
-  /// 노드 레벨에 따른 기본 색상을 반환 / Returns default color based on node level
+  /// Returns default color based on node level
   Color getDefaultNodeColor(int level) {
     return defaultNodeColors[level % defaultNodeColors.length];
   }
 
-  /// 노드 레벨에 따른 텍스트 크기를 반환 / Returns text size based on node level
+  /// Returns text size based on node level
   double getTextSize(int level) {
     if (level == 0) return 14.0;
     if (level == 1) return 12.0;
     return 10.0;
   }
 
-  /// 노드의 실제 크기를 반환 / Returns actual node size
+  /// Returns actual node size
   ///
   /// If [measuredSize] is provided and [enableAutoSizing] is true, uses the measured size
   /// with min/max constraints. Otherwise uses level-based default sizing.

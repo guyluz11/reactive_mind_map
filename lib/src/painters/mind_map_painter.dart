@@ -4,7 +4,7 @@ import '../models/mind_map_node.dart';
 import '../models/mind_map_style.dart';
 import '../enums/mind_map_layout.dart';
 
-/// 마인드맵 전체를 그리는 커스텀 페인터
+/// Custom painter for drawing the entire mind map
 class MindMapPainter extends CustomPainter {
   final MindMapNode rootNode;
   final MindMapStyle style;
@@ -16,7 +16,7 @@ class MindMapPainter extends CustomPainter {
     _drawConnections(canvas, rootNode);
   }
 
-  /// 연결선을 그리는 메소드
+  /// Method to draw connection lines
   void _drawConnections(Canvas canvas, MindMapNode node) {
     if (node.children.isEmpty) return;
 
@@ -35,7 +35,7 @@ class MindMapPainter extends CustomPainter {
     }
   }
 
-  /// 두 노드 사이의 연결선을 그리는 메소드
+  /// Method to draw connection line between two nodes
   void _drawConnection(Canvas canvas, MindMapNode parent, MindMapNode child) {
     final paint =
         Paint()
@@ -57,7 +57,10 @@ class MindMapPainter extends CustomPainter {
   ) {
     final distance = (child.position - parent.position).distance;
 
-    final parentSize = style.getActualNodeSize(parent.level, measuredSize: parent.measuredSize);
+    final parentSize = style.getActualNodeSize(
+      parent.level,
+      measuredSize: parent.measuredSize,
+    );
 
     final minDistance = parentSize.width / 2 + 20;
 
@@ -76,7 +79,10 @@ class MindMapPainter extends CustomPainter {
           ..strokeWidth = style.connectionWidth
           ..style = PaintingStyle.stroke;
 
-    final childSize = style.getActualNodeSize(child.level, measuredSize: child.measuredSize);
+    final childSize = style.getActualNodeSize(
+      child.level,
+      measuredSize: child.measuredSize,
+    );
 
     final angle = math.atan2(
       child.position.dy - parent.position.dy,
@@ -121,7 +127,7 @@ class MindMapPainter extends CustomPainter {
     }
   }
 
-  /// 곡선 연결선 그리기
+  /// Draw curved connection line
   void _drawCurvedConnection(
     Canvas canvas,
     MindMapNode parent,
@@ -155,7 +161,7 @@ class MindMapPainter extends CustomPainter {
     canvas.drawPath(path, paint);
   }
 
-  /// 직선 연결선 그리기
+  /// Draw straight connection line
   void _drawStraightConnection(
     Canvas canvas,
     MindMapNode parent,
@@ -169,13 +175,19 @@ class MindMapPainter extends CustomPainter {
     canvas.drawLine(startPoint, endPoint, paint);
   }
 
-  /// 레이아웃에 따른 연결점 계산
+  /// Calculate connection points based on layout
   Map<String, Offset> _getConnectionPoints(
     MindMapNode parent,
     MindMapNode child,
   ) {
-    final parentSize = style.getActualNodeSize(parent.level, measuredSize: parent.measuredSize);
-    final childSize = style.getActualNodeSize(child.level, measuredSize: child.measuredSize);
+    final parentSize = style.getActualNodeSize(
+      parent.level,
+      measuredSize: parent.measuredSize,
+    );
+    final childSize = style.getActualNodeSize(
+      child.level,
+      measuredSize: child.measuredSize,
+    );
 
     Offset startPoint;
     Offset endPoint;
@@ -306,7 +318,7 @@ class MindMapPainter extends CustomPainter {
     return {'start': startPoint, 'end': endPoint};
   }
 
-  /// 베지어 곡선의 제어점 계산
+  /// Calculate control points for Bezier curve
   Map<String, Offset> _getControlPoints(
     Offset start,
     Offset end,
@@ -315,8 +327,14 @@ class MindMapPainter extends CustomPainter {
   ) {
     Offset control1, control2;
 
-    final parentSize = style.getActualNodeSize(parent.level, measuredSize: parent.measuredSize);
-    final childSize = style.getActualNodeSize(child.level, measuredSize: child.measuredSize);
+    final parentSize = style.getActualNodeSize(
+      parent.level,
+      measuredSize: parent.measuredSize,
+    );
+    final childSize = style.getActualNodeSize(
+      child.level,
+      measuredSize: child.measuredSize,
+    );
 
     final distance = math.sqrt(
       math.pow(end.dx - start.dx, 2) + math.pow(end.dy - start.dy, 2),
@@ -367,7 +385,7 @@ class MindMapPainter extends CustomPainter {
     return {'control1': control1, 'control2': control2};
   }
 
-  /// 연결 방향 결정
+  /// Determine connection direction
   String _getConnectionDirection(Offset start, Offset end) {
     switch (style.layout) {
       case MindMapLayout.right:

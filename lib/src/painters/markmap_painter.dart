@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/mind_map_data.dart';
 import '../models/mind_map_style.dart';
 
-/// markmap.js 스타일 마인드맵을 그리는 CustomPainter
+/// CustomPainter for drawing markmap.js style mind map
 class MarkmapPainter extends CustomPainter {
   final MindMapData data;
   final MindMapStyle style;
@@ -10,10 +10,10 @@ class MarkmapPainter extends CustomPainter {
   final String? selectedNodeId;
   final Function(String nodeId, Offset position)? onNodePositionCalculated;
 
-  // 레이아웃 설정
-  final double xSpacing = 200.0; // x축 간격
-  final double ySpacing = 40.0; // y축 간격
-  final double startX = 100.0; // 시작 x좌표
+  // Layout settings
+  final double xSpacing = 200.0; // x-axis spacing
+  final double ySpacing = 40.0; // y-axis spacing
+  final double startX = 100.0; // starting x coordinate
 
   MarkmapPainter({
     required this.data,
@@ -28,10 +28,10 @@ class MarkmapPainter extends CustomPainter {
     final startY = size.height / 2;
     final nodePositions = <String, Offset>{};
 
-    // 루트 노드부터 시작
+    // Start from root node
     _drawNode(canvas, data, Offset(startX, startY), nodePositions, 0);
 
-    // 노드 위치 정보 콜백 호출
+    // Call node position info callback
     if (onNodePositionCalculated != null) {
       nodePositions.forEach((nodeId, position) {
         onNodePositionCalculated!(nodeId, position);
@@ -39,7 +39,7 @@ class MarkmapPainter extends CustomPainter {
     }
   }
 
-  /// 서브트리 전체 높이 계산
+  /// Calculate total subtree height
   double _subtreeHeight(MindMapData node, int level) {
     if (node.children.isEmpty) {
       return 40.0; // Default height
@@ -49,10 +49,10 @@ class MarkmapPainter extends CustomPainter {
     for (final child in node.children) {
       childrenHeight += _subtreeHeight(child, level + 1) + ySpacing;
     }
-    return childrenHeight - ySpacing; // 마지막 ySpacing 제외
+    return childrenHeight - ySpacing; // Exclude last ySpacing
   }
 
-  /// 재귀적으로 노드 그리기
+  /// Draw nodes recursively
   void _drawNode(
     Canvas canvas,
     MindMapData node,
@@ -62,10 +62,10 @@ class MarkmapPainter extends CustomPainter {
   ) {
     final subtreeHeight = _subtreeHeight(node, level);
 
-    // 자식 노드 y 시작점 계산
+    // Calculate child node y starting point
     double childY = position.dy - subtreeHeight / 2;
 
-    // 자식 노드들 먼저 그리기 (재귀)
+    // Draw child nodes first (recursive)
     for (final child in node.children) {
       final childSubtreeHeight = _subtreeHeight(child, level + 1);
       final childPos = Offset(
@@ -73,27 +73,27 @@ class MarkmapPainter extends CustomPainter {
         childY + childSubtreeHeight / 2,
       );
 
-      // 연결선 그리기 (부드러운 곡선)
+      // Draw connection line (smooth curve)
       if (animationValue > 0.3) {
         _drawConnection(canvas, position, childPos, node.color);
       }
 
-      // 자식 노드 재귀 호출
+      // Recursive call for child node
       _drawNode(canvas, child, childPos, nodePositions, level + 1);
 
       childY += childSubtreeHeight + ySpacing;
     }
 
-    // 위치 정보 저장
+    // Save position info
     nodePositions[node.id] = position;
   }
 
-  /// 연결선 그리기 (베지어 곡선)
+  /// Draw connection line (Bezier curve)
   void _drawConnection(Canvas canvas, Offset start, Offset end, Color? color) {
     final path = Path();
     path.moveTo(start.dx, start.dy);
 
-    // 부드러운 베지어 곡선
+    // Smooth Bezier curve
     final controlDistance = xSpacing * 0.3;
     final controlPoint1 = Offset(start.dx + controlDistance, start.dy);
     final controlPoint2 = Offset(end.dx - controlDistance, end.dy);

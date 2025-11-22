@@ -1,20 +1,20 @@
-/// 노드의 모양을 정의하는 열거형
+/// Enum defining node shape
 enum NodeShape {
-  /// 둥근 사각형 (기본값)
+  /// Rounded rectangle (default)
   roundedRectangle,
 
-  /// 원형
+  /// Circle
   circle,
 
-  /// 사각형
+  /// Rectangle
   rectangle,
 
-  /// 다이아몬드
+  /// Diamond
   diamond,
 
-  /// 육각형
+  /// Hexagon
   hexagon,
 
-  /// 타원
+  /// Ellipse
   ellipse,
 }

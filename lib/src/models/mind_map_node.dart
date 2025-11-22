@@ -2,63 +2,63 @@ import 'package:flutter/material.dart';
 
 import 'mind_map_data.dart';
 
-/// 내부 처리용 마인드맵 노드 클래스
+/// Mind map node class for internal processing
 class MindMapNode {
-  /// 노드 ID
+  /// Node ID
   final String id;
 
-  /// 노드 컨텐츠
+  /// Node content
   final Widget content;
 
-  /// 노드 설명
+  /// Node description
   final String description;
 
-  /// 하위 노드들
+  /// Child nodes
   final List<MindMapNode> children;
 
-  /// 확장 상태
+  /// Expansion state
   bool isExpanded;
 
-  /// 현재 위치
+  /// Current position
   Offset position;
 
-  /// 목표 위치
+  /// Target position
   Offset targetPosition;
 
-  /// 노드 색상
+  /// Node color
   Color color;
 
-  /// 테두리 색상
+  /// Border color
   Color? borderColor;
 
-  /// 측정된 노드 크기 (위젯 렌더링 후)
+  /// Measured node size (after widget rendering)
   Size? measuredSize;
 
-  /// 애니메이션 상태
+  /// Animation state
   bool isAnimating;
 
-  /// 고정 위치 여부
+  /// Whether position is fixed
   bool hasFixedPosition;
 
-  /// 서브트리 높이
+  /// Subtree height
   double subtreeHeight;
 
-  /// 서브트리 너비 (상하 레이아웃용)
+  /// Subtree width (for vertical layout)
   double subtreeWidth;
 
-  /// 최소 Y 좌표
+  /// Minimum Y coordinate
   double minY;
 
-  /// 최대 Y 좌표
+  /// Maximum Y coordinate
   double maxY;
 
-  /// 노드 레벨
+  /// Node level
   int level;
 
-  /// 부모와의 방향 관계 (방향성 일관성을 위해)
+  /// Directional relationship with parent (for directional consistency)
   String? parentDirection;
 
-  /// 사용자 정의 데이터
+  /// Custom user data
   final Map<String, dynamic>? customData;
 
   MindMapNode({
@@ -82,7 +82,7 @@ class MindMapNode {
     this.customData,
   });
 
-  /// MindMapData로부터 MindMapNode를 생성하는 팩토리 메소드
+  /// Factory method to create MindMapNode from MindMapData
   factory MindMapNode.fromData(
     MindMapData data,
     int level, {
@@ -128,10 +128,10 @@ class MindMapNode {
     );
   }
 
-  /// 하위 노드가 있는지 확인
+  /// Check if node has children
   bool get hasChildren => children.isNotEmpty;
 
-  /// 리프 노드인지 확인
+  /// Check if node is a leaf node
   bool get isLeaf => children.isEmpty;
 
   @override

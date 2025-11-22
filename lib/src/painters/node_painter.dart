@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import '../enums/node_shape.dart';
 
-/// 다양한 모양의 노드를 그리는 페인터
+/// Painter for drawing various node shapes
 class NodePainter {
-  /// 지정된 모양으로 노드를 그림
+  /// Draw node with specified shape
   static void paintNode({
     required Canvas canvas,
     required Rect rect,
@@ -34,7 +34,7 @@ class NodePainter {
     }
   }
 
-  /// 둥근 사각형 그리기
+  /// Draw rounded rectangle
   static void _paintRoundedRectangle(
     Canvas canvas,
     Rect rect,
@@ -48,7 +48,7 @@ class NodePainter {
     }
   }
 
-  /// 원형 그리기
+  /// Draw circle
   static void _paintCircle(
     Canvas canvas,
     Rect rect,
@@ -63,7 +63,7 @@ class NodePainter {
     }
   }
 
-  /// 사각형 그리기
+  /// Draw rectangle
   static void _paintRectangle(
     Canvas canvas,
     Rect rect,
@@ -76,7 +76,7 @@ class NodePainter {
     }
   }
 
-  /// 다이아몬드 그리기
+  /// Draw diamond
   static void _paintDiamond(
     Canvas canvas,
     Rect rect,
@@ -88,10 +88,10 @@ class NodePainter {
     final halfWidth = rect.width / 2;
     final halfHeight = rect.height / 2;
 
-    path.moveTo(center.dx, center.dy - halfHeight); // 상단
-    path.lineTo(center.dx + halfWidth, center.dy); // 우측
-    path.lineTo(center.dx, center.dy + halfHeight); // 하단
-    path.lineTo(center.dx - halfWidth, center.dy); // 좌측
+    path.moveTo(center.dx, center.dy - halfHeight); // top
+    path.lineTo(center.dx + halfWidth, center.dy); // right
+    path.lineTo(center.dx, center.dy + halfHeight); // bottom
+    path.lineTo(center.dx - halfWidth, center.dy); // left
     path.close();
 
     canvas.drawPath(path, fillPaint);
@@ -100,7 +100,7 @@ class NodePainter {
     }
   }
 
-  /// 육각형 그리기
+  /// Draw hexagon
   static void _paintHexagon(
     Canvas canvas,
     Rect rect,
@@ -130,7 +130,7 @@ class NodePainter {
     }
   }
 
-  /// 타원 그리기
+  /// Draw ellipse
   static void _paintEllipse(
     Canvas canvas,
     Rect rect,

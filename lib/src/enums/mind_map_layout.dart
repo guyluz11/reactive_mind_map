@@ -1,23 +1,23 @@
-/// 마인드맵 레이아웃 방향을 정의하는 열거형
+/// Enum defining mind map layout direction
 enum MindMapLayout {
-  /// 오른쪽으로만 확장 (기본값)
+  /// Expand only to the right (default)
   right,
 
-  /// 왼쪽으로만 확장
+  /// Expand only to the left
   left,
 
-  /// 위쪽으로만 확장
+  /// Expand only upward
   top,
 
-  /// 아래쪽으로만 확장
+  /// Expand only downward
   bottom,
 
-  /// 모든 방향으로 확장 (원형)
+  /// Expand in all directions (radial)
   radial,
 
-  /// 양쪽으로 확장 (좌우)
+  /// Expand to both sides (left and right)
   horizontal,
 
-  /// 양쪽으로 확장 (상하)
+  /// Expand to both sides (top and bottom)
   vertical,
 }

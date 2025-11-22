@@ -128,7 +128,7 @@ class _TestScreenState extends State<TestScreen> {
                   () => _focusToNode(CameraFocus.custom, 'node1'),
                 ),
                 _buildButton(
-                  '서브1',
+                  'Sub 1',
                   () => _focusToNode(CameraFocus.custom, 'sub1'),
                 ),
                 _buildButton(

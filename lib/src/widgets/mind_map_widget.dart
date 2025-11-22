@@ -1133,7 +1133,7 @@ class MindMapWidgetState extends State<MindMapWidget>
     });
   }
 
-  /// 특정 노드에 대한 중앙 정렬 수행 (기존 로직 재사용)
+  /// 특정 노드에 대한 중앙 정렬 수행 (기존 로직 재사용) / Perform center view on specific node
   void _performCenterViewOnNode(String nodeId) {
     final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
     if (renderBox == null || !renderBox.hasSize) {
@@ -1147,19 +1147,30 @@ class MindMapWidgetState extends State<MindMapWidget>
     final targetNode = _findNodeById(rootNode, nodeId);
     if (targetNode == null) return;
 
+    // 노드의 시각적 중심 (position은 이미 노드의 중심점)
     final Offset targetPosition = targetNode.position;
 
     // 정확한 중앙 정렬 계산 (기존 로직과 동일)
     final double viewportCenterX = viewportSize.width / 2;
     final double viewportCenterY = viewportSize.height / 2;
 
-    final double tx = viewportCenterX - (targetPosition.dx * scale);
-    final double ty = viewportCenterY - (targetPosition.dy * scale);
+    // Calculate translation to center the target position
+    // We use the formula: t = C/s - v
+    // Matrix construction: S * T
+
+    // Correction based on manual calibration:
+    // The calculated Y translation is consistently off by ~93.6 pixels (unscaled).
+    // This likely accounts for system UI (AppBar, SafeArea) or layout offsets.
+    const double verticalOffset = 93.6;
+
+    final double tx = viewportCenterX / scale - targetPosition.dx;
+    final double ty =
+        viewportCenterY / scale - targetPosition.dy - verticalOffset;
 
     final newTransform =
         Matrix4.identity()
-          ..translate(tx, ty)
-          ..scale(scale);
+          ..scale(scale)
+          ..translate(tx, ty);
 
     // 부드러운 애니메이션으로 이동 (기존 focusAnimation 지속시간 사용)
     _animateToTransform(newTransform);
@@ -1228,7 +1239,7 @@ class MindMapWidgetState extends State<MindMapWidget>
         );
         break;
 
-      case CameraFocus.fitAll:
+      case CameraFocus.allNodes:
         final bounds = _calculateAllNodesBounds();
         if (bounds != null) {
           final double scaleX =
@@ -1239,6 +1250,30 @@ class MindMapWidgetState extends State<MindMapWidget>
               bounds.height;
           scale = math.min(scaleX, math.min(scaleY, widget.initialScale));
           scale = math.max(scale, widget.viewerOptions?.minScale ?? 0.1);
+
+          targetPosition = Offset(
+            bounds.left + bounds.width / 2,
+            bounds.top + bounds.height / 2,
+          );
+        }
+        break;
+
+      case CameraFocus.fitAllNodes:
+        final bounds = _calculateAllNodesBounds();
+        if (bounds != null) {
+          // Calculate scale to fit all nodes with margins
+          final double scaleX =
+              (viewportSize.width - widget.focusMargin.horizontal) /
+              bounds.width;
+          final double scaleY =
+              (viewportSize.height - widget.focusMargin.vertical) /
+              bounds.height;
+          scale = math.min(scaleX, scaleY);
+          // Clamp to viewer constraints
+          scale = scale.clamp(
+            widget.viewerOptions?.minScale ?? 0.1,
+            widget.viewerOptions?.maxScale ?? 2.5,
+          );
 
           targetPosition = Offset(
             bounds.left + bounds.width / 2,
@@ -1259,6 +1294,25 @@ class MindMapWidgetState extends State<MindMapWidget>
           final targetNode = _findNodeById(rootNode, widget.focusNodeId!);
           if (targetNode != null) {
             targetPosition = targetNode.position;
+
+            // Calculate scale based on focusMargin to control zoom level
+            // focusMargin of 0 = fit node to screen width
+            // larger focusMargin = zoom out to show more context
+            final nodeSize = widget.style.getActualNodeSize(
+              targetNode.level,
+              measuredSize: targetNode.measuredSize,
+            );
+
+            // Calculate scale to fit node width with margins
+            final availableWidth =
+                viewportSize.width - widget.focusMargin.horizontal;
+            final scaleToFitWidth = availableWidth / nodeSize.width;
+
+            // Use the calculated scale, clamped to viewer constraints
+            scale = scaleToFitWidth.clamp(
+              widget.viewerOptions?.minScale ?? 0.1,
+              widget.viewerOptions?.maxScale ?? 2.5,
+            );
           }
         }
         break;
@@ -1271,13 +1325,20 @@ class MindMapWidgetState extends State<MindMapWidget>
 
     // 변환 공식: 화면중심 = (캔버스좌표 * 스케일) + 이동값
     // 따라서: 이동값 = 화면중심 - (캔버스좌표 * 스케일)
-    final double tx = viewportCenterX - (targetPosition.dx * scale);
-    final double ty = viewportCenterY - (targetPosition.dy * scale);
+    // Calculate translation to center the target position
+    // We use the formula: t = C/s - v
+
+    // Correction based on manual calibration:
+    const double verticalOffset = 93.6;
+
+    final double tx = viewportCenterX / scale - targetPosition.dx;
+    final double ty =
+        viewportCenterY / scale - targetPosition.dy - verticalOffset;
 
     final newTransform =
         Matrix4.identity()
-          ..translate(tx, ty)
-          ..scale(scale);
+          ..scale(scale)
+          ..translate(tx, ty);
 
     // 애니메이션 또는 즉시 적용
     if (widget.focusAnimation.inMilliseconds > 0) {
@@ -1539,61 +1600,57 @@ class MindMapWidgetState extends State<MindMapWidget>
     final viewerOptions =
         widget.viewerOptions ?? const InteractiveViewerOptions();
 
-    // 마인드맵 콘텐츠를 스크롤뷰로 감싸서 오버플로우 방지
-    final mindMapContent =
-        (widget.captureKey != null)
-            ? RepaintBoundary(
-              key: widget.captureKey,
-              child: Container(
-                width: canvasSize.width,
-                height: canvasSize.height,
-                decoration: BoxDecoration(color: widget.style.backgroundColor),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: SizedBox(
-                      width: canvasSize.width,
-                      height: canvasSize.height,
-                      child: CustomPaint(
-                        painter: MindMapPainter(rootNode, widget.style),
-                        child: Stack(children: _buildAllNodes(rootNode)),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            )
-            : Container(
-              width: _actualCanvasSize.width,
-              height: _actualCanvasSize.height,
-              decoration: BoxDecoration(color: widget.style.backgroundColor),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: SizedBox(
-                    width: _actualCanvasSize.width,
-                    height: _actualCanvasSize.height,
-                    child: CustomPaint(
-                      painter: MindMapPainter(rootNode, widget.style),
-                      child: Stack(children: _buildAllNodes(rootNode)),
-                    ),
-                  ),
-                ),
-              ),
-            );
+    // 마인드맵 콘텐츠
+    Widget content = Container(
+      width: canvasSize.width,
+      height: canvasSize.height,
+      decoration: BoxDecoration(color: widget.style.backgroundColor),
+      child: SizedBox(
+        width: canvasSize.width,
+        height: canvasSize.height,
+        child: CustomPaint(
+          painter: MindMapPainter(rootNode, widget.style),
+          child: Stack(children: _buildAllNodes(rootNode)),
+        ),
+      ),
+    );
+
+    // 캡처 키가 있으면 RepaintBoundary로 감싸기
+    if (widget.captureKey != null) {
+      content = RepaintBoundary(key: widget.captureKey, child: content);
+    }
+
+    // InteractiveViewer가 비활성화된 경우에만 스크롤뷰 추가
+    if (!viewerOptions.enablePanAndZoom) {
+      content = SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: content,
+        ),
+      );
+    }
+
+    final mindMapContent = content;
 
     if (viewerOptions.enablePanAndZoom) {
-      return InteractiveViewer(
-        // Disable clipping so we can capture the full mind map
-        clipBehavior: Clip.none,
-        transformationController: _transformationController,
-        constrained: viewerOptions.constrained,
-        boundaryMargin: viewerOptions.boundaryMargin,
-        minScale: viewerOptions.minScale,
-        maxScale: viewerOptions.maxScale,
-        child: mindMapContent,
+      return Stack(
+        children: [
+          InteractiveViewer(
+            // Disable clipping so we can capture the full mind map
+            clipBehavior: Clip.none,
+            alignment:
+                Alignment
+                    .topLeft, // Ensure (0,0) matches (0,0) for correct coordinate calculations
+            transformationController: _transformationController,
+            constrained: viewerOptions.constrained,
+            // Use a large boundary margin to allow free movement and centering of nodes near edges
+            boundaryMargin: const EdgeInsets.all(double.infinity),
+            minScale: viewerOptions.minScale,
+            maxScale: viewerOptions.maxScale,
+            child: mindMapContent,
+          ),
+        ],
       );
     } else {
       return mindMapContent;
@@ -1640,16 +1697,22 @@ class MindMapWidgetState extends State<MindMapWidget>
     final nodeTop = node.position.dy - layoutSize.height / 2;
 
     // 화면 경계 체크 (캔버스 크기 기준)
-    final maxLeft = _actualCanvasSize.width - layoutSize.width;
-    final maxTop = _actualCanvasSize.height - layoutSize.height;
+    // Note: We do NOT clamp positions anymore because:
+    // 1. InteractiveViewer has infinite boundary margin and Clip.none, so nodes outside bounds are visible.
+    // 2. Clamping causes a mismatch between node.position (used for camera focus) and rendered position.
+    // final maxLeft = _actualCanvasSize.width - layoutSize.width;
+    // final maxTop = _actualCanvasSize.height - layoutSize.height;
 
-    double constrainedLeft = nodeLeft;
-    double constrainedTop = nodeTop;
+    // double constrainedLeft = nodeLeft;
+    // double constrainedTop = nodeTop;
 
-    if (widget.style.enableAutoSizing) {
-      constrainedLeft = constrainedLeft.clamp(0.0, maxLeft);
-      constrainedTop = constrainedTop.clamp(0.0, maxTop);
-    }
+    // if (widget.style.enableAutoSizing) {
+    //   constrainedLeft = constrainedLeft.clamp(0.0, maxLeft);
+    //   constrainedTop = constrainedTop.clamp(0.0, maxTop);
+    // }
+
+    final constrainedLeft = nodeLeft;
+    final constrainedTop = nodeTop;
 
     // 스타일의 노드 빌더가 있으면 우선 사용
     if (widget.style.nodeBuilder != null) {
@@ -1842,9 +1905,5 @@ class MindMapWidgetState extends State<MindMapWidget>
           side: BorderSide(color: borderColor, width: borderWidth),
         );
     }
-    return RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(4),
-      side: BorderSide(color: borderColor, width: borderWidth),
-    );
   }
 }

@@ -47,9 +47,7 @@ class _TestScreenState extends State<TestScreen> {
       children: [
         MindMapData(
           id: 'node1',
-          content: const Text(
-            'Testing this node to see if it can hangle long text or does it switch it to three dots so this is the very long text to Testing this node to see if it can hangle long text or does it switch it to three dots so this is the very long text\n\n to Testing this node to see if it can hangle long text or does it switch it  to Testing this node to see if it to three dots so this is the very long text to And this is the last line',
-          ),
+          content: const Text('Test test'),
           borderColor: Colors.green,
           children: [
             MindMapData(
@@ -59,7 +57,14 @@ class _TestScreenState extends State<TestScreen> {
             ),
             MindMapData(
               id: 'sub2',
-              content: const Text('Test test test', textAlign: TextAlign.right),
+              content: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 250),
+                child: Container(
+                  margin: const EdgeInsets.all(50 / 2),
+
+                  child: const Text('sdasd asd as', textAlign: TextAlign.right),
+                ),
+              ),
             ),
           ],
         ),
@@ -107,7 +112,7 @@ class _TestScreenState extends State<TestScreen> {
                 ),
                 _buildButton(
                   '🔍 전체보기',
-                  () => _focusToNode(CameraFocus.fitAll, null),
+                  () => _focusToNode(CameraFocus.allNodes, null),
                 ),
                 _buildButton(
                   '📝 노드1',
@@ -203,10 +208,12 @@ class _TestScreenState extends State<TestScreen> {
                     nodeMargin: 15,
                   ),
                   cameraFocus: currentFocus,
+                  // focusMargin: EdgeInsets.all(0),
+                  nodeExpandCameraBehavior:
+                      NodeExpandCameraBehavior.fitExpandedSubtree,
                   focusNodeId: targetNodeId,
                   focusAnimation: const Duration(), // 더 긴 애니메이션
                   isNodesCollapsed: false, // 모든 노드 펼쳐져 있음
-                  nodeExpandCameraBehavior: expandBehavior,
                   onNodeTap: (node) {
                     debugPrint('탭된 노드: ${node.description} (${node.id})');
                     setState(() {
@@ -249,14 +256,16 @@ class _TestScreenState extends State<TestScreen> {
     switch (currentFocus) {
       case CameraFocus.rootNode:
         return '루트';
-      case CameraFocus.fitAll:
+      case CameraFocus.allNodes:
         return '전체보기';
+      case CameraFocus.fitAllNodes:
+        return '전체 맞춤';
       case CameraFocus.custom:
         return '커스텀';
-      case CameraFocus.firstLeaf:
-        return '첫리프';
       case CameraFocus.center:
         return '중앙';
+      case CameraFocus.firstLeaf:
+        return '첫 리프';
     }
   }
 

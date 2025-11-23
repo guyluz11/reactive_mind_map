@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../controller/mind_map_controller.dart';
 import '../../../core/enums/camera_focus.dart';
 import '../../../core/enums/mind_map_layout.dart';
 import '../../../core/enums/node_shape.dart';
@@ -76,6 +77,9 @@ class MindMapWidget extends StatefulWidget {
   /// Useful when the widget is not full screen (e.g. in a bottom sheet or column).
   final bool autoCenterOnScreen;
 
+  /// Controller for programmatic control
+  final MindMapController? controller;
+
   const MindMapWidget({
     super.key,
     required this.data,
@@ -97,6 +101,7 @@ class MindMapWidget extends StatefulWidget {
     this.centerOffset,
     this.debugMode = false,
     this.autoCenterOnScreen = false,
+    this.controller,
   });
 
   @override
@@ -121,7 +126,8 @@ class InteractiveViewerOptions {
 }
 
 class MindMapWidgetState extends State<MindMapWidget>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin
+    implements MindMapControllerDelegate {
   // Controller to manage initial centering in InteractiveViewer
   late TransformationController _transformationController;
   late MindMapNode rootNode;
@@ -144,6 +150,10 @@ class MindMapWidgetState extends State<MindMapWidget>
     super.initState();
     // Initialize transformation controller for centering
     _transformationController = TransformationController();
+
+    // Attach controller
+    widget.controller?.attach(this);
+
     _initializeMindMap();
     _calculateCanvasAndLayout();
 
@@ -168,6 +178,12 @@ class MindMapWidgetState extends State<MindMapWidget>
   @override
   void didUpdateWidget(MindMapWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    // Handle controller updates
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller?.detach();
+      widget.controller?.attach(this);
+    }
 
     // If the data or style is changed, recalculate the entire layout
     if (oldWidget.data != widget.data ||
@@ -1308,20 +1324,6 @@ class MindMapWidgetState extends State<MindMapWidget>
     return Rect.fromLTRB(minX, minY, maxX, maxY);
   }
 
-  /// Find first leaf node
-  MindMapNode? _findFirstLeafNode(MindMapNode node) {
-    if (!node.hasChildren || !node.isExpanded) {
-      return node;
-    }
-
-    for (final child in node.children) {
-      final leaf = _findFirstLeafNode(child);
-      if (leaf != null) return leaf;
-    }
-
-    return null;
-  }
-
   /// Find node by ID
   MindMapNode? _findNodeById(MindMapNode node, String id) {
     if (node.id == id) return node;
@@ -1916,6 +1918,9 @@ class MindMapWidgetState extends State<MindMapWidget>
     }
   }
 
+  @override
+  void zoomToFit() => zoomToFitAll();
+
   /// Zoom out to fit all nodes in the viewport
   void zoomToFitAll() {
     if (!mounted) return;
@@ -1943,22 +1948,28 @@ class MindMapWidgetState extends State<MindMapWidget>
     _animateToCameraPosition(targetPosition, scale);
   }
 
-  /// Focus on the next node in the sequence
+  @override
   void focusNext() {
     if (!mounted) return;
 
     _buildFocusableNodesList();
     if (_focusableNodes.isEmpty) return;
 
-    // Move to next node (wrap around)
-    _currentFocusedNodeIndex =
-        (_currentFocusedNodeIndex + 1) % _focusableNodes.length;
+    // Move to next node (wrap around) with state update
+    setState(() {
+      _currentFocusedNodeIndex =
+          (_currentFocusedNodeIndex + 1) % _focusableNodes.length;
+    });
     final node = _focusableNodes[_currentFocusedNodeIndex];
 
-    _focusOnNodeCenter(node);
+    // Schedule focus after layout stabilizes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _focusOnNodeCenter(node);
+    });
   }
 
-  /// Focus on the previous node in the sequence
+  @override
   void focusPrevious() {
     if (!mounted) return;
 
@@ -1972,6 +1983,30 @@ class MindMapWidgetState extends State<MindMapWidget>
     final node = _focusableNodes[_currentFocusedNodeIndex];
 
     _focusOnNodeCenter(node);
+  }
+
+  @override
+  void focusNode(String nodeId) {
+    if (!mounted) return;
+
+    // Find node by ID
+    MindMapNode? targetNode;
+    void findNode(MindMapNode node) {
+      if (node.id == nodeId) {
+        targetNode = node;
+        return;
+      }
+      for (var child in node.children) {
+        findNode(child);
+        if (targetNode != null) return;
+      }
+    }
+
+    findNode(rootNode);
+
+    if (targetNode != null) {
+      _focusOnNodeCenter(targetNode!);
+    }
   }
 
   /// Focus camera on the center of a specific node, preserving current zoom level

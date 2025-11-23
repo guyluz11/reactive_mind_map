@@ -7,3 +7,4 @@ export 'src/core/enums/camera_focus.dart';
 export 'src/features/canvas/widgets/mind_map_widget.dart'
     show MindMapWidget, InteractiveViewerOptions;
 export 'src/features/canvas/widgets/mind_map_widget.dart';
+export 'src/controller/mind_map_controller.dart';

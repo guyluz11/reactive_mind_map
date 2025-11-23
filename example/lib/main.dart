@@ -26,8 +26,8 @@ class TestScreen extends StatefulWidget {
 }
 
 class _TestScreenState extends State<TestScreen> {
-  CameraFocus currentFocus = CameraFocus.rootNode;
-  String? targetNodeId;
+  final GlobalKey<MindMapWidgetState> _mindMapKey =
+      GlobalKey<MindMapWidgetState>();
   String lastAction = 'Start';
   NodeExpandCameraBehavior expandBehavior = NodeExpandCameraBehavior.none;
 
@@ -90,44 +90,128 @@ class _TestScreenState extends State<TestScreen> {
       ),
       body: Column(
         children: [
-          // Simple buttons
+          // Camera Controls
           Container(
             padding: const EdgeInsets.all(16),
-            child: Wrap(
-              spacing: 8,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildButton(
-                  '🎯 Root',
-                  () => _focusToNode(CameraFocus.rootNode, null),
+                const Text(
+                  'Camera Controls',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                _buildButton(
-                  '🔍 Fit All',
-                  () => _focusToNode(CameraFocus.allNodes, null),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _mindMapKey.currentState?.zoomToFitAll();
+                        setState(() {
+                          lastAction = 'Fit All Nodes';
+                        });
+                      },
+                      icon: const Icon(Icons.fit_screen),
+                      label: const Text('Fit All'),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _mindMapKey.currentState?.focusNext();
+                        setState(() {
+                          lastAction = 'Focus Next';
+                        });
+                      },
+                      icon: const Icon(Icons.arrow_forward),
+                      label: const Text('Next Node'),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _mindMapKey.currentState?.focusPrevious();
+                        setState(() {
+                          lastAction = 'Focus Previous';
+                        });
+                      },
+                      icon: const Icon(Icons.arrow_back),
+                      label: const Text('Previous Node'),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        // Get camera state
+                        final state = _mindMapKey.currentState;
+                        if (state != null) {
+                          final transform =
+                              state.transformationController.value;
+                          final scale = transform.getMaxScaleOnAxis();
+                          final translation = transform.getTranslation();
+
+                          debugPrint('📷 ========== CAMERA DEBUG ==========');
+                          debugPrint('📷 Scale: $scale');
+                          debugPrint(
+                            '📷 Translation: x=${translation.x}, y=${translation.y}, z=${translation.z}',
+                          );
+
+                          // Get current focused node info
+                          if (state.focusableNodes.isNotEmpty &&
+                              state.currentFocusedNodeIndex <
+                                  state.focusableNodes.length) {
+                            final currentNode =
+                                state.focusableNodes[state
+                                    .currentFocusedNodeIndex];
+                            debugPrint('📷 Current Focused Node:');
+                            debugPrint('   - ID: ${currentNode.id}');
+                            debugPrint(
+                              '   - Position (center): ${currentNode.position}',
+                            );
+                            debugPrint(
+                              '   - Measured Size: ${currentNode.measuredSize}',
+                            );
+
+                            // Calculate where this node appears on screen
+                            final nodeScreenX =
+                                currentNode.position.dx * scale + translation.x;
+                            final nodeScreenY =
+                                currentNode.position.dy * scale + translation.y;
+                            debugPrint(
+                              '   - Screen Position: x=$nodeScreenX, y=$nodeScreenY',
+                            );
+                          }
+
+                          // Get viewport size
+                          final renderBox =
+                              state.context.findRenderObject() as RenderBox?;
+                          if (renderBox != null) {
+                            final viewportSize = renderBox.size;
+                            final viewportCenterX = viewportSize.width / 2;
+                            final viewportCenterY = viewportSize.height / 2;
+                            debugPrint('📷 Viewport:');
+                            debugPrint(
+                              '   - Size: ${viewportSize.width} x ${viewportSize.height}',
+                            );
+                            debugPrint(
+                              '   - Center: x=$viewportCenterX, y=$viewportCenterY',
+                            );
+                          }
+                          debugPrint('📷 ===================================');
+
+                          setState(() {
+                            lastAction = 'Camera Debug Logged';
+                          });
+                        }
+                      },
+                      icon: const Icon(Icons.bug_report),
+                      label: const Text('Debug Camera'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                      ),
+                    ),
+                  ],
                 ),
-                _buildButton(
-                  '📝 Node 1',
-                  () => _focusToNode(CameraFocus.custom, 'node1'),
-                ),
-                _buildButton(
-                  'Sub 1',
-                  () => _focusToNode(CameraFocus.custom, 'sub1'),
-                ),
-                _buildButton(
-                  'Final',
-                  () => _focusToNode(CameraFocus.custom, 'final'),
-                ),
-                _buildButton(
-                  '🍃 First Leaf',
-                  () => _focusToNode(CameraFocus.firstLeaf, null),
-                ),
-                // Forward/Backward focus buttons
-                _buildButton('⬅️ Prev', _focusPreviousNode),
-                _buildButton('Next ➡️', _focusNextNode),
               ],
             ),
           ),
 
-          // 🆕 Select node expand behavior
+          // Expand Behavior
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
@@ -167,7 +251,6 @@ class _TestScreenState extends State<TestScreen> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                Text('Current Focus: ${_getFocusName()}'),
                 Text('Last Action: $lastAction'),
                 Text('Expand Behavior: ${_getExpandBehaviorName()}'),
               ],
@@ -185,15 +268,14 @@ class _TestScreenState extends State<TestScreen> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: MindMapWidget(
+                  key: _mindMapKey,
                   data: mindMapData,
                   style: const MindMapStyle(
                     levelSpacing: 120,
                     nodeMargin: 15,
                     enableAutoSizing: true,
                   ),
-                  cameraFocus: currentFocus,
-                  focusNodeId: targetNodeId,
-                  focusAnimation: const Duration(), // Longer animation
+                  cameraAnimationDuration: const Duration(milliseconds: 500),
                   isNodesCollapsed: false, // All nodes expanded
                   nodeExpandCameraBehavior:
                       NodeExpandCameraBehavior.fitExpandedSubtree,
@@ -215,44 +297,6 @@ class _TestScreenState extends State<TestScreen> {
         ],
       ),
     );
-  }
-
-  Widget _buildButton(String text, VoidCallback onPressed) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      ),
-      child: Text(text, style: const TextStyle(fontSize: 12)),
-    );
-  }
-
-  void _focusToNode(CameraFocus focus, String? nodeId) {
-    setState(() {
-      currentFocus = focus;
-      targetNodeId = nodeId;
-      lastAction =
-          'Move to ${_getFocusName()} ${nodeId != null ? '→ $nodeId' : ''}';
-    });
-  }
-
-  String _getFocusName() {
-    switch (currentFocus) {
-      case CameraFocus.rootNode:
-        return 'Root';
-      case CameraFocus.allNodes:
-        return 'Fit All';
-      case CameraFocus.fitAllNodes:
-        return 'Fit All Nodes';
-      case CameraFocus.custom:
-        return 'Custom';
-      case CameraFocus.center:
-        return 'Center';
-      case CameraFocus.firstLeaf:
-        return 'First Leaf';
-    }
   }
 
   Widget _buildExpandBehaviorButton(
@@ -281,37 +325,5 @@ class _TestScreenState extends State<TestScreen> {
       case NodeExpandCameraBehavior.fitExpandedSubtree:
         return '🌳 Subtree';
     }
-  }
-
-  void _focusNextNode() {
-    final flatNodes = mindMapData.flatten();
-    if (flatNodes.isEmpty) return;
-    int currentIdx = flatNodes.indexWhere((n) => n.id == targetNodeId);
-    int nextIdx = (currentIdx + 1) % flatNodes.length;
-    final nextNode = flatNodes[nextIdx];
-    setState(() {
-      mindMapData = MindMapData.updateNodeInTree(
-        mindMapData,
-        nextNode.id,
-        (node) => node.copyWith(color: Colors.blue),
-      );
-      currentFocus = CameraFocus.custom;
-      targetNodeId = nextNode.id;
-      lastAction = 'Move to next node: ${nextNode.description}';
-    });
-  }
-
-  void _focusPreviousNode() {
-    final flatNodes = mindMapData.flatten();
-    if (flatNodes.isEmpty) return;
-    int currentIdx = flatNodes.indexWhere((n) => n.id == targetNodeId);
-    int prevIdx = (currentIdx - 1);
-    if (prevIdx < 0) prevIdx = flatNodes.length - 1;
-    final prevNode = flatNodes[prevIdx];
-    setState(() {
-      currentFocus = CameraFocus.custom;
-      targetNodeId = prevNode.id;
-      lastAction = 'Move to prev node: ${prevNode.description}';
-    });
   }
 }

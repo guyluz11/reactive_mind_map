@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -55,17 +56,8 @@ class MindMapWidget extends StatefulWidget {
   /// Initial zoom scale for the mind map (1.0 = no zoom)
   final double initialScale;
 
-  /// Camera focus option
-  final CameraFocus cameraFocus;
-
-  /// Specific node ID to focus on
-  final String? focusNodeId;
-
-  /// Focus animation duration
-  final Duration focusAnimation;
-
-  /// Margin when focusing
-  final EdgeInsets focusMargin;
+  /// Animation duration for camera movements
+  final Duration cameraAnimationDuration;
 
   /// Camera behavior when expanding nodes
   final NodeExpandCameraBehavior nodeExpandCameraBehavior;
@@ -99,10 +91,7 @@ class MindMapWidget extends StatefulWidget {
     this.isNodesCollapsed = false,
     this.initialScale = 1.0,
     this.captureKey,
-    this.cameraFocus = CameraFocus.rootNode,
-    this.focusNodeId,
-    this.focusAnimation = const Duration(milliseconds: 300),
-    this.focusMargin = const EdgeInsets.all(20),
+    this.cameraAnimationDuration = const Duration(milliseconds: 300),
     this.nodeExpandCameraBehavior = NodeExpandCameraBehavior.none,
     this.backgroundWidget,
     this.centerOffset,
@@ -143,6 +132,12 @@ class MindMapWidgetState extends State<MindMapWidget>
   late Offset _rootPosition;
 
   bool _isTogglingNode = false;
+  bool _isInitialLoad = true;
+  Timer? _stabilizationTimer;
+
+  // New camera navigation state
+  int _currentFocusedNodeIndex = 0;
+  List<MindMapNode> _focusableNodes = [];
 
   @override
   void initState() {
@@ -151,11 +146,22 @@ class MindMapWidgetState extends State<MindMapWidget>
     _transformationController = TransformationController();
     _initializeMindMap();
     _calculateCanvasAndLayout();
+
     // Center the root after first frame if pan/zoom is enabled
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if ((widget.viewerOptions?.enablePanAndZoom ?? true)) {
         _centerView();
       }
+
+      // Disable initial load state after a stabilization period
+      // This allows the layout to settle (MeasureSize callbacks) before we stop auto-centering
+      _stabilizationTimer = Timer(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          setState(() {
+            _isInitialLoad = false;
+          });
+        }
+      });
     });
   }
 
@@ -181,19 +187,11 @@ class MindMapWidgetState extends State<MindMapWidget>
         }
       });
     }
-    // If only the camera focus is changed, move the focus immediately
-    else if (oldWidget.cameraFocus != widget.cameraFocus ||
-        oldWidget.focusNodeId != widget.focusNodeId) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && (widget.viewerOptions?.enablePanAndZoom ?? true)) {
-          _centerView();
-        }
-      });
-    }
   }
 
   @override
   void dispose() {
+    _stabilizationTimer?.cancel();
     _transformationController.dispose();
     for (var controller in _activeAnimations) {
       controller.dispose();
@@ -224,6 +222,8 @@ class MindMapWidgetState extends State<MindMapWidget>
   void _calculateCanvasAndLayout() {
     if (!mounted) return;
 
+    debugPrint('🔄 _calculateCanvasAndLayout called');
+
     try {
       _actualCanvasSize = widget.canvasSize ?? widget.minCanvasSize;
 
@@ -252,6 +252,19 @@ class MindMapWidgetState extends State<MindMapWidget>
 
       if (mounted) {
         setState(() {});
+
+        // If we are still in the initial load phase, re-center the view
+        // This ensures that as nodes report their actual sizes (via MeasureSize),
+        // the camera adjusts to the new layout positions.
+        // BUT: Don't interrupt user-initiated focus changes
+        if (_isInitialLoad &&
+            (widget.viewerOptions?.enablePanAndZoom ?? true)) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              _centerView();
+            }
+          });
+        }
       }
     } catch (e) {
       debugPrint('Layout calculation error: $e');
@@ -1247,7 +1260,7 @@ class MindMapWidgetState extends State<MindMapWidget>
     });
   }
 
-  /// Perform actual center alignment
+  /// Perform actual center alignment (simplified for initial load only)
   void _performCenterView() {
     // Get the exact size from RenderBox
     final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
@@ -1255,145 +1268,11 @@ class MindMapWidgetState extends State<MindMapWidget>
       return;
     }
 
-    final Size viewportSize = renderBox.size;
+    // Simply center on root node with initial scale
+    final double scale = widget.initialScale;
+    final Offset targetPosition = _rootPosition;
 
-    double scale = widget.initialScale;
-    Offset targetPosition = _rootPosition;
-
-    switch (widget.cameraFocus) {
-      case CameraFocus.rootNode:
-        targetPosition = _rootPosition;
-        break;
-
-      case CameraFocus.center:
-        targetPosition = Offset(
-          _actualCanvasSize.width / 2,
-          _actualCanvasSize.height / 2,
-        );
-        break;
-
-      case CameraFocus.allNodes:
-        final bounds = _calculateAllNodesBounds();
-        if (bounds != null) {
-          final double scaleX =
-              (viewportSize.width - widget.focusMargin.horizontal) /
-              bounds.width;
-          final double scaleY =
-              (viewportSize.height - widget.focusMargin.vertical) /
-              bounds.height;
-          scale = math.min(scaleX, math.min(scaleY, widget.initialScale));
-          scale = math.max(scale, widget.viewerOptions?.minScale ?? 0.1);
-
-          targetPosition = Offset(
-            bounds.left + bounds.width / 2,
-            bounds.top + bounds.height / 2,
-          );
-        }
-        break;
-
-      case CameraFocus.fitAllNodes:
-        final bounds = _calculateAllNodesBounds();
-        if (bounds != null) {
-          // Calculate scale to fit all nodes with margins
-          final double scaleX =
-              (viewportSize.width - widget.focusMargin.horizontal) /
-              bounds.width;
-          final double scaleY =
-              (viewportSize.height - widget.focusMargin.vertical) /
-              bounds.height;
-          scale = math.min(scaleX, scaleY);
-          // Clamp to viewer constraints
-          scale = scale.clamp(
-            widget.viewerOptions?.minScale ?? 0.1,
-            widget.viewerOptions?.maxScale ?? 2.5,
-          );
-
-          targetPosition = Offset(
-            bounds.left + bounds.width / 2,
-            bounds.top + bounds.height / 2,
-          );
-        }
-        break;
-
-      case CameraFocus.firstLeaf:
-        final firstLeaf = _findFirstLeafNode(rootNode);
-        if (firstLeaf != null) {
-          targetPosition = firstLeaf.position;
-        }
-        break;
-
-      case CameraFocus.custom:
-        if (widget.focusNodeId != null) {
-          final targetNode = _findNodeById(rootNode, widget.focusNodeId!);
-          if (targetNode != null) {
-            targetPosition = targetNode.position;
-
-            // Calculate scale based on focusMargin to control zoom level
-            // focusMargin of 0 = fit node to screen width
-            // larger focusMargin = zoom out to show more context
-            final nodeSize = widget.style.getActualNodeSize(
-              targetNode.level,
-              measuredSize: targetNode.measuredSize,
-            );
-
-            // Calculate scale to fit node width with margins
-            final availableWidth =
-                viewportSize.width - widget.focusMargin.horizontal;
-            final scaleToFitWidth = availableWidth / nodeSize.width;
-
-            // Use the calculated scale, clamped to viewer constraints
-            scale = scaleToFitWidth.clamp(
-              widget.viewerOptions?.minScale ?? 0.1,
-              widget.viewerOptions?.maxScale ?? 2.5,
-            );
-          }
-        }
-        break;
-    }
-
-    // Calculate exact center
-    // Goal: Transform targetPosition to viewport center
-    final double viewportCenterX = viewportSize.width / 2;
-    final double viewportCenterY = viewportSize.height / 2;
-    // Formula: Center = (CanvasCoord * Scale) + Translation
-    // So: Translation = Center - (CanvasCoord * Scale)
-    // Calculate translation to center the target position
-    // We use the formula: t = C/s - v
-
-    // Dynamic Correction based on manual calibration:
-    double verticalOffset = widget.centerOffset?.dy ?? 0.0;
-    double horizontalOffset = widget.centerOffset?.dx ?? 0.0;
-
-    // Auto-center on screen logic
-    if (widget.autoCenterOnScreen) {
-      final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
-      if (renderBox != null) {
-        final globalPos = renderBox.localToGlobal(Offset.zero);
-        final screenHeight = MediaQuery.of(context).size.height;
-        final screenCenterY = screenHeight / 2;
-        final widgetCenterY = globalPos.dy + renderBox.size.height / 2;
-        verticalOffset += (widgetCenterY - screenCenterY);
-      }
-    }
-
-    final double tx =
-        viewportCenterX / scale - targetPosition.dx - horizontalOffset;
-    final double ty =
-        viewportCenterY / scale - targetPosition.dy - verticalOffset;
-
-    final newTransform =
-        Matrix4.identity()
-          // ignore: deprecated_member_use
-          ..scale(scale, scale, 1.0)
-          // ignore: deprecated_member_use
-          ..translate(tx, ty, 0.0);
-
-    // Animate or apply immediately
-    if (widget.focusAnimation.inMilliseconds > 0) {
-      _animateToTransform(newTransform);
-    } else {
-      _transformationController.value = newTransform;
-    }
+    _animateToCameraPosition(targetPosition, scale);
   }
 
   /// Calculate bounds of all nodes
@@ -1457,31 +1336,72 @@ class MindMapWidgetState extends State<MindMapWidget>
 
   /// Apply transform with animation
   void _animateToTransform(Matrix4 targetTransform) {
+    debugPrint('🎥 _animateToTransform called, creating AnimationController');
+
+    // CRITICAL: Cancel all existing animations before starting a new one
+    // This prevents multiple animations from fighting over the transform controller
+    for (final controller in List.from(_activeAnimations)) {
+      controller.stop();
+      controller.dispose();
+    }
+    _activeAnimations.clear();
+    debugPrint('🎥 Canceled ${_activeAnimations.length} previous animations');
+
+    final Matrix4 beginTransform = _transformationController.value;
+    final double beginScale = beginTransform.getMaxScaleOnAxis();
+    final double endScale = targetTransform.getMaxScaleOnAxis();
+
+    // Extract translation from matrices
+    final beginTx = beginTransform.getTranslation().x;
+    final beginTy = beginTransform.getTranslation().y;
+    final endTx = targetTransform.getTranslation().x;
+    final endTy = targetTransform.getTranslation().y;
+
+    debugPrint('🎥 BEGIN: scale=$beginScale, tx=$beginTx, ty=$beginTy');
+    debugPrint('🎥 END: scale=$endScale, tx=$endTx, ty=$endTy');
+    debugPrint(
+      '🎥 DELTA: scale=${endScale - beginScale}, tx=${endTx - beginTx}, ty=${endTy - beginTy}',
+    );
+
     final AnimationController animationController = AnimationController(
-      duration: widget.focusAnimation,
+      duration: widget.cameraAnimationDuration,
       vsync: this,
     );
 
     final Animation<Matrix4> transformAnimation = Tween<Matrix4>(
-      begin: _transformationController.value,
+      begin: beginTransform,
       end: targetTransform,
     ).animate(
       CurvedAnimation(parent: animationController, curve: Curves.easeInOut),
     );
 
+    int updateCount = 0;
     animationController.addListener(() {
       _transformationController.value = transformAnimation.value;
+      updateCount++;
+      if (updateCount % 10 == 0) {
+        // Log every 10th update to avoid spam
+        final currentTx = transformAnimation.value.getTranslation().x;
+        final currentTy = transformAnimation.value.getTranslation().y;
+        debugPrint(
+          '🎥 Animation update #$updateCount: tx=$currentTx, ty=$currentTy',
+        );
+      }
     });
 
     animationController.addStatusListener((status) {
       if (status == AnimationStatus.completed ||
           status == AnimationStatus.dismissed) {
+        debugPrint(
+          '🎥 Animation ${status == AnimationStatus.completed ? "completed" : "dismissed"}',
+        );
         animationController.dispose();
         _activeAnimations.remove(animationController);
       }
     });
 
     _activeAnimations.add(animationController);
+    debugPrint('🎥 Starting animation forward...');
     animationController.forward();
   }
 
@@ -1728,11 +1648,9 @@ class MindMapWidgetState extends State<MindMapWidget>
                     return null;
                   }
 
-                  // Find focused or selected node to print its size
+                  // Find selected node to print its size
                   MindMapNode? targetNode;
-                  if (widget.focusNodeId != null) {
-                    targetNode = findNodeInTree(rootNode, widget.focusNodeId!);
-                  } else if (_selectedNodeId != null) {
+                  if (_selectedNodeId != null) {
                     targetNode = findNodeInTree(rootNode, _selectedNodeId!);
                   }
 
@@ -1773,8 +1691,7 @@ class MindMapWidgetState extends State<MindMapWidget>
   /// Build individual node widget
   Widget _buildNodeWidget(MindMapNode node) {
     final isSelected = _selectedNodeId == node.id;
-    final isFocused =
-        widget.focusNodeId != null && widget.focusNodeId == node.id;
+    final isFocused = false; // focusNodeId parameter was removed
 
     // Determine node size: prioritize measuredSize if available, otherwise use style default
     // However, if customSize (node.size) exists, that takes highest priority
@@ -1978,4 +1895,185 @@ class MindMapWidgetState extends State<MindMapWidget>
         );
     }
   }
+
+  // ============================================================================
+  // PUBLIC CAMERA CONTROL METHODS
+  // ============================================================================
+
+  /// Build list of all focusable nodes in depth-first order
+  void _buildFocusableNodesList() {
+    _focusableNodes.clear();
+    _addNodeToFocusableList(rootNode);
+  }
+
+  void _addNodeToFocusableList(MindMapNode node) {
+    _focusableNodes.add(node);
+    for (final child in node.children) {
+      if (child.isExpanded) {
+        // Only add expanded (visible) children
+        _addNodeToFocusableList(child);
+      }
+    }
+  }
+
+  /// Zoom out to fit all nodes in the viewport
+  void zoomToFitAll() {
+    if (!mounted) return;
+
+    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null || !renderBox.hasSize) return;
+
+    final Size viewportSize = renderBox.size;
+    final bounds = _calculateAllNodesBounds();
+
+    if (bounds == null) return;
+
+    // Calculate scale to fit all nodes with margin
+    const margin = 50.0;
+    final scaleX = (viewportSize.width - margin * 2) / bounds.width;
+    final scaleY = (viewportSize.height - margin * 2) / bounds.height;
+    final scale = math.min(scaleX, scaleY).clamp(0.1, 2.5);
+
+    // Center of all nodes
+    final targetPosition = Offset(
+      bounds.left + bounds.width / 2,
+      bounds.top + bounds.height / 2,
+    );
+
+    _animateToCameraPosition(targetPosition, scale);
+  }
+
+  /// Focus on the next node in the sequence
+  void focusNext() {
+    if (!mounted) return;
+
+    _buildFocusableNodesList();
+    if (_focusableNodes.isEmpty) return;
+
+    // Move to next node (wrap around)
+    _currentFocusedNodeIndex =
+        (_currentFocusedNodeIndex + 1) % _focusableNodes.length;
+    final node = _focusableNodes[_currentFocusedNodeIndex];
+
+    _focusOnNodeCenter(node);
+  }
+
+  /// Focus on the previous node in the sequence
+  void focusPrevious() {
+    if (!mounted) return;
+
+    _buildFocusableNodesList();
+    if (_focusableNodes.isEmpty) return;
+
+    // Move to previous node (wrap around)
+    _currentFocusedNodeIndex =
+        (_currentFocusedNodeIndex - 1 + _focusableNodes.length) %
+        _focusableNodes.length;
+    final node = _focusableNodes[_currentFocusedNodeIndex];
+
+    _focusOnNodeCenter(node);
+  }
+
+  /// Focus camera on the center of a specific node, preserving current zoom level
+  void _focusOnNodeCenter(MindMapNode node) {
+    final currentTransform = _transformationController.value;
+    final double currentScale = currentTransform.getMaxScaleOnAxis();
+    _animateToCameraPositionNoOffset(node.position, currentScale);
+  }
+
+  /// Animate camera to a specific position and scale, ignoring autoCenterOnScreen offsets
+  void _animateToCameraPositionNoOffset(Offset targetPosition, double scale) {
+    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null || !renderBox.hasSize) return;
+
+    final Size viewportSize = renderBox.size;
+    final double viewportCenterX = viewportSize.width / 2;
+    final double viewportCenterY = viewportSize.height / 2;
+
+    // No offsets applied
+    final double tx = viewportCenterX / scale - targetPosition.dx;
+    final double ty = viewportCenterY / scale - targetPosition.dy;
+
+    final newTransform =
+        Matrix4.identity()
+          ..scale(scale, scale, 1.0)
+          ..translate(tx, ty, 0.0);
+
+    if (widget.cameraAnimationDuration.inMilliseconds > 0) {
+      _animateToTransform(newTransform);
+    } else {
+      _transformationController.value = newTransform;
+    }
+  }
+
+  /// Animate camera to a specific position and scale
+  void _animateToCameraPosition(Offset targetPosition, double scale) {
+    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null || !renderBox.hasSize) return;
+
+    final Size viewportSize = renderBox.size;
+    final double viewportCenterX = viewportSize.width / 2;
+    final double viewportCenterY = viewportSize.height / 2;
+
+    // Apply offsets
+    double verticalOffset = widget.centerOffset?.dy ?? 0.0;
+    double horizontalOffset = widget.centerOffset?.dx ?? 0.0;
+
+    if (widget.autoCenterOnScreen) {
+      final globalPos = renderBox.localToGlobal(Offset.zero);
+      final screenHeight = MediaQuery.of(context).size.height;
+      final screenCenterY = screenHeight / 2;
+      final widgetCenterY = globalPos.dy + renderBox.size.height / 2;
+      final autoOffset = widgetCenterY - screenCenterY;
+      verticalOffset += autoOffset;
+
+      debugPrint('🎯 autoCenterOnScreen calculation:');
+      debugPrint('   - globalPos.dy: ${globalPos.dy}');
+      debugPrint('   - renderBox.size.height: ${renderBox.size.height}');
+      debugPrint('   - widgetCenterY: $widgetCenterY');
+      debugPrint('   - screenHeight: $screenHeight');
+      debugPrint('   - screenCenterY: $screenCenterY');
+      debugPrint('   - autoOffset: $autoOffset');
+      debugPrint('   - total verticalOffset: $verticalOffset');
+    }
+
+    // Calculate translation to center the target position
+    final double tx =
+        viewportCenterX / scale - targetPosition.dx - horizontalOffset;
+    final double ty =
+        viewportCenterY / scale - targetPosition.dy - verticalOffset;
+
+    debugPrint('🎯 Final camera calculation:');
+    debugPrint('   - targetPosition: $targetPosition');
+    debugPrint('   - viewportCenter: ($viewportCenterX, $viewportCenterY)');
+    debugPrint('   - scale: $scale');
+    debugPrint('   - offsets: h=$horizontalOffset, v=$verticalOffset');
+    debugPrint('   - translation: tx=$tx, ty=$ty');
+
+    final newTransform =
+        Matrix4.identity()
+          ..scale(scale, scale, 1.0)
+          ..translate(tx, ty, 0.0);
+
+    // Animate to new transform
+    if (widget.cameraAnimationDuration.inMilliseconds > 0) {
+      _animateToTransform(newTransform);
+    } else {
+      _transformationController.value = newTransform;
+    }
+  }
+
+  // ============================================================================
+  // PUBLIC GETTERS FOR DEBUGGING
+  // ============================================================================
+
+  /// Get the transformation controller (for debugging)
+  TransformationController get transformationController =>
+      _transformationController;
+
+  /// Get the list of focusable nodes (for debugging)
+  List<MindMapNode> get focusableNodes => _focusableNodes;
+
+  /// Get the current focused node index (for debugging)
+  int get currentFocusedNodeIndex => _currentFocusedNodeIndex;
 }

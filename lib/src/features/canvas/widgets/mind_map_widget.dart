@@ -91,7 +91,7 @@ class MindMapWidget extends StatefulWidget {
     this.isNodesCollapsed = false,
     this.initialScale = 1.0,
     this.captureKey,
-    this.cameraAnimationDuration = const Duration(milliseconds: 300),
+    this.cameraAnimationDuration = const Duration(seconds: 1),
     this.nodeExpandCameraBehavior = NodeExpandCameraBehavior.none,
     this.backgroundWidget,
     this.centerOffset,
@@ -1976,9 +1976,28 @@ class MindMapWidgetState extends State<MindMapWidget>
 
   /// Focus camera on the center of a specific node, preserving current zoom level
   void _focusOnNodeCenter(MindMapNode node) {
-    final currentTransform = _transformationController.value;
-    final double currentScale = currentTransform.getMaxScaleOnAxis();
-    _animateToCameraPositionNoOffset(node.position, currentScale);
+    // Compute target scale to fit the node within the viewport
+    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null || !renderBox.hasSize) return;
+    final Size viewportSize = renderBox.size;
+
+    // Determine node size using style (fallback to measuredSize)
+    final nodeSize = widget.style.getActualNodeSize(
+      node.level,
+      measuredSize: node.measuredSize,
+    );
+
+    // Calculate scale to fit node (no margins)
+    double scaleX = viewportSize.width / nodeSize.width;
+    double scaleY = viewportSize.height / nodeSize.height;
+    double targetScale = math.min(scaleX, scaleY);
+    targetScale = targetScale.clamp(
+      widget.viewerOptions?.minScale ?? 0.1,
+      widget.viewerOptions?.maxScale ?? 2.5,
+    );
+
+    // Animate to node center with calculated scale, ignoring auto offsets
+    _animateToCameraPositionNoOffset(node.position, targetScale);
   }
 
   /// Animate camera to a specific position and scale, ignoring autoCenterOnScreen offsets

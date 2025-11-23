@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import '../models/mind_map_node.dart';
-import '../models/mind_map_style.dart';
-import '../enums/mind_map_layout.dart';
+import '../../node/models/mind_map_node.dart';
+import '../../node/models/mind_map_style.dart';
+import '../../../core/enums/mind_map_layout.dart';
 
 /// Custom painter for drawing the entire mind map
 class MindMapPainter extends CustomPainter {

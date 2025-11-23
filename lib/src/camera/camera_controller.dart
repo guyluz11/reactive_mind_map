@@ -2,10 +2,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../constants/mind_map_constants.dart';
-import '../enums/camera_focus.dart';
-import '../models/mind_map_node.dart';
-import '../models/mind_map_style.dart';
+import '../core/constants/mind_map_constants.dart';
+import '../core/enums/camera_focus.dart';
+import '../features/node/models/mind_map_node.dart';
+import '../features/node/models/mind_map_style.dart';
 
 /// Controller for managing camera/viewport operations in the mind map
 ///

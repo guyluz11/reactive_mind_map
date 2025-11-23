@@ -3,15 +3,15 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../enums/camera_focus.dart';
-import '../enums/mind_map_layout.dart';
-import '../enums/node_shape.dart';
-import '../models/mind_map_data.dart';
-import '../models/mind_map_node.dart';
-import '../models/mind_map_style.dart';
+import '../../../core/enums/camera_focus.dart';
+import '../../../core/enums/mind_map_layout.dart';
+import '../../../core/enums/node_shape.dart';
+import '../../node/models/mind_map_data.dart';
+import '../../node/models/mind_map_node.dart';
+import '../../node/models/mind_map_style.dart';
 // import '../enums/mind_map_type.dart';
-import '../painters/mind_map_painter.dart';
-import 'measure_size.dart';
+import '../../edge/painters/mind_map_painter.dart';
+import '../../../core/widgets/measure_size.dart';
 // import 'markmap_widget.dart'; // in development
 
 /// Customizable mind map widget

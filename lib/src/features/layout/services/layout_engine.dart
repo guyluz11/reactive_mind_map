@@ -1,13 +1,13 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-import '../constants/mind_map_constants.dart';
-import '../enums/mind_map_layout.dart';
-import '../models/mind_map_node.dart';
-import '../models/mind_map_style.dart';
+import '../../../core/constants/mind_map_constants.dart';
+import '../../../core/enums/mind_map_layout.dart';
+import '../../node/models/mind_map_node.dart';
+import '../../node/models/mind_map_style.dart';
 
 /// Engine responsible for calculating mind map layout
-/// 
+///
 /// This class handles all layout-related calculations including:
 /// - Canvas size calculation
 /// - Root node positioning
@@ -24,7 +24,9 @@ class LayoutEngine {
       MindMapConstants.defaultMinCanvasWidth,
       MindMapConstants.defaultMinCanvasHeight,
     ),
-    this.canvasPadding = const EdgeInsets.all(MindMapConstants.defaultCanvasPadding),
+    this.canvasPadding = const EdgeInsets.all(
+      MindMapConstants.defaultCanvasPadding,
+    ),
   });
 
   /// Calculate the root node position based on layout type
@@ -37,13 +39,17 @@ class LayoutEngine {
         );
       case MindMapLayout.left:
         return Offset(
-          canvasSize.width - canvasPadding.right - MindMapConstants.defaultRootNodeOffset,
+          canvasSize.width -
+              canvasPadding.right -
+              MindMapConstants.defaultRootNodeOffset,
           canvasSize.height / 2,
         );
       case MindMapLayout.top:
         return Offset(
           canvasSize.width / 2,
-          canvasSize.height - canvasPadding.bottom - MindMapConstants.defaultRootNodeOffset,
+          canvasSize.height -
+              canvasPadding.bottom -
+              MindMapConstants.defaultRootNodeOffset,
         );
       case MindMapLayout.bottom:
         return Offset(
@@ -53,10 +59,7 @@ class LayoutEngine {
       case MindMapLayout.radial:
       case MindMapLayout.horizontal:
       case MindMapLayout.vertical:
-        return Offset(
-          canvasSize.width / 2,
-          canvasSize.height / 2,
-        );
+        return Offset(canvasSize.width / 2, canvasSize.height / 2);
     }
   }
 
@@ -171,18 +174,18 @@ class LayoutEngine {
           case MindMapLayout.left:
           case MindMapLayout.horizontal:
             expandedWidth += estimatedSpacing;
-            expandedHeight +=
-                childCount * (nodeSize.height + style.nodeMargin);
+            expandedHeight += childCount * (nodeSize.height + style.nodeMargin);
             break;
           case MindMapLayout.top:
           case MindMapLayout.bottom:
           case MindMapLayout.vertical:
-            expandedWidth +=
-                childCount * (nodeSize.width + style.nodeMargin);
+            expandedWidth += childCount * (nodeSize.width + style.nodeMargin);
             expandedHeight += estimatedSpacing;
             break;
           case MindMapLayout.radial:
-            final radius = estimatedSpacing * MindMapConstants.radialLayoutRadiusMultiplier;
+            final radius =
+                estimatedSpacing *
+                MindMapConstants.radialLayoutRadiusMultiplier;
             expandedWidth += radius * 2;
             expandedHeight += radius * 2;
             break;
@@ -238,7 +241,8 @@ class LayoutEngine {
       measuredSize: node.measuredSize,
     );
 
-    final additionalMargin = nodeSize.height * MindMapConstants.additionalMarginMultiplier;
+    final additionalMargin =
+        nodeSize.height * MindMapConstants.additionalMarginMultiplier;
     final minSpacing = style.nodeMargin * MindMapConstants.minSpacingMultiplier;
 
     final childCountFactor = math.max(
@@ -290,7 +294,8 @@ class LayoutEngine {
       measuredSize: node.measuredSize,
     );
 
-    final additionalMargin = nodeSize.width * MindMapConstants.additionalMarginMultiplier;
+    final additionalMargin =
+        nodeSize.width * MindMapConstants.additionalMarginMultiplier;
     final minSpacing = style.nodeMargin * MindMapConstants.minSpacingMultiplier;
 
     final childCountFactor = math.max(
@@ -329,7 +334,8 @@ class LayoutEngine {
     final baseSpacing = style.levelSpacing;
     final parentMaxSize = math.max(parentSize.width, parentSize.height);
 
-    final nodeBasedSpacing = (parentMaxSize + maxChildSize) / 2 + 
+    final nodeBasedSpacing =
+        (parentMaxSize + maxChildSize) / 2 +
         MindMapConstants.nodeBasedSpacingOffset;
     final childCountFactor = math.max(
       1.0,

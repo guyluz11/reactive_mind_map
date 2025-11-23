@@ -55,26 +55,7 @@ class _TestScreenState extends State<TestScreen> {
               borderColor: Colors.purple,
               content: const Text('Sub 1'),
             ),
-            MindMapData(
-              id: 'sub2',
-              content: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 250),
-                child: Container(
-                  margin: const EdgeInsets.all(50 / 2),
-
-                  child: TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Enter your name',
-                      hintText: 'John Doe',
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (value) {
-                      debugPrint('User typed: $value');
-                    },
-                  ),
-                ),
-              ),
-            ),
+            MindMapData(id: 'sub2', content: Text('das')),
           ],
         ),
         MindMapData(id: 'node2', content: const Text('🎨 Node 2')),

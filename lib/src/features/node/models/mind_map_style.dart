@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../enums/mind_map_layout.dart';
-import '../enums/node_shape.dart';
-import '../enums/mind_map_type.dart';
-import '../models/mind_map_node.dart';
+import '../../../core/enums/mind_map_layout.dart';
+import '../../../core/enums/node_shape.dart';
+import '../../../core/enums/mind_map_type.dart';
+import 'mind_map_node.dart';
 
 /// Class that defines the overall style of the mind map
 class MindMapStyle {

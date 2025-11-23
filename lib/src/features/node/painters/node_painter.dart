@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import '../enums/node_shape.dart';
+import '../../../core/enums/node_shape.dart';
 
 /// Painter for drawing various node shapes
 class NodePainter {

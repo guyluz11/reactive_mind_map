@@ -2020,10 +2020,10 @@ class MindMapWidgetState extends State<MindMapWidget>
   }
 
   @override
-  void zoomToFit() => zoomToFitAll();
+  Future<void> zoomToFit() => zoomToFitAll();
 
   /// Zoom out to fit all nodes in the viewport
-  void zoomToFitAll() {
+  Future<void> zoomToFitAll() async {
     if (!mounted) return;
 
     final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
@@ -2046,7 +2046,7 @@ class MindMapWidgetState extends State<MindMapWidget>
       bounds.top + bounds.height / 2,
     );
 
-    _animateToCameraPosition(targetPosition, scale);
+    return _animateToCameraPosition(targetPosition, scale);
   }
 
   @override
@@ -2181,9 +2181,9 @@ class MindMapWidgetState extends State<MindMapWidget>
   }
 
   /// Animate camera to a specific position and scale
-  void _animateToCameraPosition(Offset targetPosition, double scale) {
+  Future<void> _animateToCameraPosition(Offset targetPosition, double scale) {
     final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
-    if (renderBox == null || !renderBox.hasSize) return;
+    if (renderBox == null || !renderBox.hasSize) return Future.value();
 
     final Size viewportSize = renderBox.size;
     final double viewportCenterX = viewportSize.width / 2;
@@ -2231,9 +2231,10 @@ class MindMapWidgetState extends State<MindMapWidget>
 
     // Animate to new transform
     if (widget.cameraAnimationDuration.inMilliseconds > 0) {
-      _animateToTransform(newTransform);
+      return _animateToTransform(newTransform);
     } else {
       _transformationController.value = newTransform;
+      return Future.value();
     }
   }
 

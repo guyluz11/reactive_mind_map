@@ -5,7 +5,7 @@ import '../features/node/models/mind_map_node.dart';
 /// Delegate interface for the controller to interact with the widget state
 abstract class MindMapControllerDelegate {
   /// Zoom to fit all nodes
-  void zoomToFit();
+  Future<void> zoomToFit();
 
   /// Focus on the next node
   Future<void> focusNext();
@@ -40,8 +40,8 @@ class MindMapController extends ChangeNotifier {
   }
 
   /// Zoom to fit all nodes in the viewport
-  void zoomToFit() {
-    _delegate?.zoomToFit();
+  Future<void> zoomToFit() async {
+    await _delegate?.zoomToFit();
   }
 
   /// Focus on the next node in the traversal order

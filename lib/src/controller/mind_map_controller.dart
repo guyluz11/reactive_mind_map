@@ -8,13 +8,13 @@ abstract class MindMapControllerDelegate {
   void zoomToFit();
 
   /// Focus on the next node
-  void focusNext();
+  Future<void> focusNext();
 
   /// Focus on the previous node
-  void focusPrevious();
+  Future<void> focusPrevious();
 
   /// Focus on a specific node by ID
-  void focusNode(String nodeId);
+  Future<void> focusNode(String nodeId);
 
   /// Modify a node at a specific index in the focusable list
   void modifyNodeAt(int index, MindMapNode Function(MindMapNode node) update);
@@ -45,18 +45,18 @@ class MindMapController extends ChangeNotifier {
   }
 
   /// Focus on the next node in the traversal order
-  void focusNext() {
-    _delegate?.focusNext();
+  Future<void> focusNext() async {
+    await _delegate?.focusNext();
   }
 
   /// Focus on the previous node in the traversal order
-  void focusPrevious() {
-    _delegate?.focusPrevious();
+  Future<void> focusPrevious() async {
+    await _delegate?.focusPrevious();
   }
 
   /// Focus on a specific node by its ID
-  void focusNode(String nodeId) {
-    _delegate?.focusNode(nodeId);
+  Future<void> focusNode(String nodeId) async {
+    await _delegate?.focusNode(nodeId);
   }
 
   /// Modify a node at a specific index in the focusable list

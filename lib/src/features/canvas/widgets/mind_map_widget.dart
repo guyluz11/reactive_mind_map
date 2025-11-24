@@ -1433,8 +1433,10 @@ class MindMapWidgetState extends State<MindMapWidget>
   }
 
   /// Apply transform with animation
-  void _animateToTransform(Matrix4 targetTransform) {
+  Future<void> _animateToTransform(Matrix4 targetTransform) {
     debugPrint('🎥 _animateToTransform called, creating AnimationController');
+
+    final completer = Completer<void>();
 
     // CRITICAL: Cancel all existing animations before starting a new one
     // This prevents multiple animations from fighting over the transform controller
@@ -1495,12 +1497,15 @@ class MindMapWidgetState extends State<MindMapWidget>
         );
         animationController.dispose();
         _activeAnimations.remove(animationController);
+        completer.complete();
       }
     });
 
     _activeAnimations.add(animationController);
     debugPrint('🎥 Starting animation forward...');
     animationController.forward();
+
+    return completer.future;
   }
 
   /// Fit specific nodes to view
@@ -2045,7 +2050,7 @@ class MindMapWidgetState extends State<MindMapWidget>
   }
 
   @override
-  void focusNext() {
+  Future<void> focusNext() async {
     if (!mounted) return;
 
     _buildFocusableNodesList();
@@ -2061,15 +2066,21 @@ class MindMapWidgetState extends State<MindMapWidget>
     // Invoke callback
     widget.onNodeFocused?.call(node);
 
-    // Schedule focus after layout stabilizes
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      _focusOnNodeCenter(node);
+    // Wait for layout to stabilize, then focus
+    final completer = Completer<void>();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) {
+        completer.complete();
+        return;
+      }
+      await _focusOnNodeCenter(node);
+      completer.complete();
     });
+    return completer.future;
   }
 
   @override
-  void focusPrevious() {
+  Future<void> focusPrevious() async {
     if (!mounted) return;
 
     _buildFocusableNodesList();
@@ -2084,11 +2095,11 @@ class MindMapWidgetState extends State<MindMapWidget>
     // Invoke callback
     widget.onNodeFocused?.call(node);
 
-    _focusOnNodeCenter(node);
+    return _focusOnNodeCenter(node);
   }
 
   @override
-  void focusNode(String nodeId) {
+  Future<void> focusNode(String nodeId) async {
     if (!mounted) return;
 
     // Find node by ID
@@ -2109,15 +2120,15 @@ class MindMapWidgetState extends State<MindMapWidget>
     if (targetNode != null) {
       // Invoke callback
       widget.onNodeFocused?.call(targetNode!);
-      _focusOnNodeCenter(targetNode!);
+      return _focusOnNodeCenter(targetNode!);
     }
   }
 
   /// Focus camera on the center of a specific node, preserving current zoom level
-  void _focusOnNodeCenter(MindMapNode node) {
+  Future<void> _focusOnNodeCenter(MindMapNode node) {
     // Compute target scale to fit the node within the viewport
     final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
-    if (renderBox == null || !renderBox.hasSize) return;
+    if (renderBox == null || !renderBox.hasSize) return Future.value();
     final Size viewportSize = renderBox.size;
 
     // Determine node size using style (fallback to measuredSize)
@@ -2137,13 +2148,16 @@ class MindMapWidgetState extends State<MindMapWidget>
     );
 
     // Animate to node center with calculated scale, ignoring auto offsets
-    _animateToCameraPositionNoOffset(node.position, targetScale);
+    return _animateToCameraPositionNoOffset(node.position, targetScale);
   }
 
   /// Animate camera to a specific position and scale, ignoring autoCenterOnScreen offsets
-  void _animateToCameraPositionNoOffset(Offset targetPosition, double scale) {
+  Future<void> _animateToCameraPositionNoOffset(
+    Offset targetPosition,
+    double scale,
+  ) {
     final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
-    if (renderBox == null || !renderBox.hasSize) return;
+    if (renderBox == null || !renderBox.hasSize) return Future.value();
 
     final Size viewportSize = renderBox.size;
     final double viewportCenterX = viewportSize.width / 2;
@@ -2159,9 +2173,10 @@ class MindMapWidgetState extends State<MindMapWidget>
           ..translate(tx, ty, 0.0);
 
     if (widget.cameraAnimationDuration.inMilliseconds > 0) {
-      _animateToTransform(newTransform);
+      return _animateToTransform(newTransform);
     } else {
       _transformationController.value = newTransform;
+      return Future.value();
     }
   }
 

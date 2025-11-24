@@ -134,6 +134,49 @@ class MindMapNode {
   /// Check if node is a leaf node
   bool get isLeaf => children.isEmpty;
 
+  /// Create a copy of this node with modified properties
+  MindMapNode copyWith({
+    String? id,
+    Widget? content,
+    String? description,
+    List<MindMapNode>? children,
+    bool? isExpanded,
+    Offset? position,
+    Offset? targetPosition,
+    Color? color,
+    Color? borderColor,
+    bool? isAnimating,
+    bool? hasFixedPosition,
+    double? subtreeHeight,
+    double? subtreeWidth,
+    double? minY,
+    double? maxY,
+    int? level,
+    String? parentDirection,
+    Map<String, dynamic>? customData,
+  }) {
+    return MindMapNode(
+      id: id ?? this.id,
+      content: content ?? this.content,
+      description: description ?? this.description,
+      children: children ?? this.children,
+      isExpanded: isExpanded ?? this.isExpanded,
+      position: position ?? this.position,
+      targetPosition: targetPosition ?? this.targetPosition,
+      color: color ?? this.color,
+      borderColor: borderColor ?? this.borderColor,
+      isAnimating: isAnimating ?? this.isAnimating,
+      hasFixedPosition: hasFixedPosition ?? this.hasFixedPosition,
+      subtreeHeight: subtreeHeight ?? this.subtreeHeight,
+      subtreeWidth: subtreeWidth ?? this.subtreeWidth,
+      minY: minY ?? this.minY,
+      maxY: maxY ?? this.maxY,
+      level: level ?? this.level,
+      parentDirection: parentDirection ?? this.parentDirection,
+      customData: customData ?? this.customData,
+    );
+  }
+
   @override
   String toString() {
     return 'MindMapNode(id: $id, level: $level, children: ${children.length})';

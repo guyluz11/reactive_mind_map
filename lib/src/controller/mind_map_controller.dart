@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import '../features/node/models/mind_map_node.dart';
+
 /// Delegate interface for the controller to interact with the widget state
 abstract class MindMapControllerDelegate {
   /// Zoom to fit all nodes
@@ -13,6 +15,12 @@ abstract class MindMapControllerDelegate {
 
   /// Focus on a specific node by ID
   void focusNode(String nodeId);
+
+  /// Modify a node at a specific index in the focusable list
+  void modifyNodeAt(int index, MindMapNode Function(MindMapNode node) update);
+
+  /// Modify a node by its ID
+  void modifyNode(String nodeId, MindMapNode Function(MindMapNode node) update);
 }
 
 /// Controller for the MindMapWidget
@@ -49,5 +57,18 @@ class MindMapController extends ChangeNotifier {
   /// Focus on a specific node by its ID
   void focusNode(String nodeId) {
     _delegate?.focusNode(nodeId);
+  }
+
+  /// Modify a node at a specific index in the focusable list
+  void modifyNodeAt(int index, MindMapNode Function(MindMapNode node) update) {
+    _delegate?.modifyNodeAt(index, update);
+  }
+
+  /// Modify a node by its ID
+  void modifyNode(
+    String nodeId,
+    MindMapNode Function(MindMapNode node) update,
+  ) {
+    _delegate?.modifyNode(nodeId, update);
   }
 }

@@ -146,6 +146,96 @@ class MindMapWidgetState extends State<MindMapWidget>
   List<MindMapNode> _focusableNodes = [];
 
   @override
+  void modifyNodeAt(int index, MindMapNode Function(MindMapNode node) update) {
+    if (!mounted) return;
+
+    // Ensure focusable nodes list is up to date
+    _buildFocusableNodesList();
+
+    if (index >= 0 && index < _focusableNodes.length) {
+      final node = _focusableNodes[index];
+      final updatedNode = update(node);
+      _updateNode(rootNode, node.id, updatedNode);
+    }
+  }
+
+  @override
+  void modifyNode(
+    String nodeId,
+    MindMapNode Function(MindMapNode node) update,
+  ) {
+    if (!mounted) return;
+
+    final node = _findNodeById(rootNode, nodeId);
+    if (node != null) {
+      final updatedNode = update(node);
+      _updateNode(rootNode, nodeId, updatedNode);
+    }
+  }
+
+  void _updateNode(
+    MindMapNode parent,
+    String targetId,
+    MindMapNode updatedNode,
+  ) {
+    if (parent.id == targetId) {
+      // Cannot replace root node directly this way usually, but let's try to handle it if needed
+      // Or we might need to update the parent's reference to this child
+      // Since we are traversing, we need to find the parent of the node to replace it in the list
+      // However, MindMapNode structure is recursive.
+      // Actually, we can just update the properties of the node if it's mutable, but MindMapNode seems to be designed to be immutable-ish with copyWith.
+      // But wait, the children list is final.
+      // If we replace a node, we need to update its parent's children list.
+      // This is a bit complex with the current structure if we don't have parent pointers.
+
+      // Let's look at how we can replace the node in the tree.
+      // We need to traverse and find the parent of the target node.
+    }
+
+    // Helper to recursively update the tree
+    bool updateTree(MindMapNode currentNode) {
+      for (int i = 0; i < currentNode.children.length; i++) {
+        if (currentNode.children[i].id == targetId) {
+          // Found the parent, replace the child
+          final List<MindMapNode> newChildren = List.from(currentNode.children);
+          newChildren[i] = updatedNode;
+          // We can't modify children list directly if it's final.
+          // We might need to make MindMapNode mutable or rebuild the tree.
+          // Looking at MindMapNode, children is `final List<MindMapNode> children;`
+          // But the list itself might be mutable?
+          // `this.children = const []` in constructor default.
+
+          // If the list is not const, we can modify it.
+          // In `fromData`, it does `.toList()`, so it is mutable.
+          currentNode.children[i] = updatedNode;
+          setState(() {
+            // Trigger rebuild
+          });
+          return true;
+        }
+        if (updateTree(currentNode.children[i])) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    if (rootNode.id == targetId) {
+      rootNode = updatedNode;
+      setState(() {});
+    } else {
+      updateTree(rootNode);
+    }
+
+    // After update, we might need to recalculate layout
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _calculateCanvasAndLayout();
+      }
+    });
+  }
+
+  @override
   void initState() {
     super.initState();
     // Initialize transformation controller for centering

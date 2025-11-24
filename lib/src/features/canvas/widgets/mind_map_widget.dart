@@ -36,6 +36,9 @@ class MindMapWidget extends StatefulWidget {
   /// Expand/collapse state change callback
   final Function(MindMapData node, bool isExpanded)? onNodeExpandChanged;
 
+  /// Node focused callback (called when node is focused via controller)
+  final ValueChanged<MindMapNode>? onNodeFocused;
+
   /// Canvas size (auto-calculated if null)
   final Size? canvasSize;
 
@@ -77,6 +80,12 @@ class MindMapWidget extends StatefulWidget {
   /// Useful when the widget is not full screen (e.g. in a bottom sheet or column).
   final bool autoCenterOnScreen;
 
+  /// Zoom out factor when focusing on a node.
+  /// 1.0 = node fills viewport exactly
+  /// > 1.0 = zoom out to show more context (e.g., 1.5 = show 50% more space)
+  /// < 1.0 = zoom in closer (not recommended as it may crop the node)
+  final double focusZoomOutFactor;
+
   /// Controller for programmatic control
   final MindMapController? controller;
 
@@ -88,6 +97,7 @@ class MindMapWidget extends StatefulWidget {
     this.onNodeLongPress,
     this.onNodeDoubleTap,
     this.onNodeExpandChanged,
+    this.onNodeFocused,
     this.canvasSize,
     this.viewerOptions,
     this.minCanvasSize = const Size(1200, 800),
@@ -101,6 +111,7 @@ class MindMapWidget extends StatefulWidget {
     this.centerOffset,
     this.debugMode = false,
     this.autoCenterOnScreen = false,
+    this.focusZoomOutFactor = 1.0,
     this.controller,
   });
 
@@ -178,61 +189,56 @@ class MindMapWidgetState extends State<MindMapWidget>
     String targetId,
     MindMapNode updatedNode,
   ) {
-    if (parent.id == targetId) {
-      // Cannot replace root node directly this way usually, but let's try to handle it if needed
-      // Or we might need to update the parent's reference to this child
-      // Since we are traversing, we need to find the parent of the node to replace it in the list
-      // However, MindMapNode structure is recursive.
-      // Actually, we can just update the properties of the node if it's mutable, but MindMapNode seems to be designed to be immutable-ish with copyWith.
-      // But wait, the children list is final.
-      // If we replace a node, we need to update its parent's children list.
-      // This is a bit complex with the current structure if we don't have parent pointers.
-
-      // Let's look at how we can replace the node in the tree.
-      // We need to traverse and find the parent of the target node.
+    // If we're updating the root node, replace it directly
+    if (rootNode.id == targetId) {
+      setState(() {
+        rootNode = updatedNode;
+      });
+      _calculateCanvasAndLayout();
+      return;
     }
 
-    // Helper to recursively update the tree
-    bool updateTree(MindMapNode currentNode) {
-      for (int i = 0; i < currentNode.children.length; i++) {
-        if (currentNode.children[i].id == targetId) {
-          // Found the parent, replace the child
-          final List<MindMapNode> newChildren = List.from(currentNode.children);
-          newChildren[i] = updatedNode;
-          // We can't modify children list directly if it's final.
-          // We might need to make MindMapNode mutable or rebuild the tree.
-          // Looking at MindMapNode, children is `final List<MindMapNode> children;`
-          // But the list itself might be mutable?
-          // `this.children = const []` in constructor default.
+    // Recursively rebuild the tree with the updated node
+    MindMapNode rebuildTree(MindMapNode current) {
+      if (current.id == targetId) {
+        return updatedNode;
+      }
 
-          // If the list is not const, we can modify it.
-          // In `fromData`, it does `.toList()`, so it is mutable.
-          currentNode.children[i] = updatedNode;
-          setState(() {
-            // Trigger rebuild
-          });
-          return true;
-        }
-        if (updateTree(currentNode.children[i])) {
-          return true;
+      // If this node has children, recursively rebuild them
+      if (current.children.isNotEmpty) {
+        final newChildren =
+            current.children.map((child) {
+              return rebuildTree(child);
+            }).toList();
+
+        // Only create a new node if children actually changed
+        if (!_listsEqual(current.children, newChildren)) {
+          return current.copyWith(children: newChildren);
         }
       }
-      return false;
+
+      return current;
     }
 
-    if (rootNode.id == targetId) {
-      rootNode = updatedNode;
-      setState(() {});
-    } else {
-      updateTree(rootNode);
-    }
+    setState(() {
+      rootNode = rebuildTree(rootNode);
+    });
 
-    // After update, we might need to recalculate layout
+    // Recalculate layout after modification
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _calculateCanvasAndLayout();
       }
     });
+  }
+
+  // Helper to check if two lists contain the same objects
+  bool _listsEqual(List<MindMapNode> a, List<MindMapNode> b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (!identical(a[i], b[i])) return false;
+    }
+    return true;
   }
 
   @override
@@ -2052,6 +2058,9 @@ class MindMapWidgetState extends State<MindMapWidget>
     });
     final node = _focusableNodes[_currentFocusedNodeIndex];
 
+    // Invoke callback
+    widget.onNodeFocused?.call(node);
+
     // Schedule focus after layout stabilizes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -2071,6 +2080,9 @@ class MindMapWidgetState extends State<MindMapWidget>
         (_currentFocusedNodeIndex - 1 + _focusableNodes.length) %
         _focusableNodes.length;
     final node = _focusableNodes[_currentFocusedNodeIndex];
+
+    // Invoke callback
+    widget.onNodeFocused?.call(node);
 
     _focusOnNodeCenter(node);
   }
@@ -2095,6 +2107,8 @@ class MindMapWidgetState extends State<MindMapWidget>
     findNode(rootNode);
 
     if (targetNode != null) {
+      // Invoke callback
+      widget.onNodeFocused?.call(targetNode!);
       _focusOnNodeCenter(targetNode!);
     }
   }
@@ -2112,10 +2126,11 @@ class MindMapWidgetState extends State<MindMapWidget>
       measuredSize: node.measuredSize,
     );
 
-    // Calculate scale to fit node (no margins)
+    // Calculate scale to fit node, then apply zoom out factor
+    // Higher focusZoomOutFactor = more zoom out = more context visible
     double scaleX = viewportSize.width / nodeSize.width;
     double scaleY = viewportSize.height / nodeSize.height;
-    double targetScale = math.min(scaleX, scaleY);
+    double targetScale = math.min(scaleX, scaleY) / widget.focusZoomOutFactor;
     targetScale = targetScale.clamp(
       widget.viewerOptions?.minScale ?? 0.1,
       widget.viewerOptions?.maxScale ?? 2.5,

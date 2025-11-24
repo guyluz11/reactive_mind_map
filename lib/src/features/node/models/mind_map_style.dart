@@ -307,4 +307,96 @@ class MindMapStyle {
       (levelSize * 0.6).clamp(minNodeHeight, double.infinity),
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! MindMapStyle) return false;
+
+    return mindMapType == other.mindMapType &&
+        layout == other.layout &&
+        nodeShape == other.nodeShape &&
+        backgroundColor == other.backgroundColor &&
+        levelSpacing == other.levelSpacing &&
+        nodeMargin == other.nodeMargin &&
+        connectionColor == other.connectionColor &&
+        connectionWidth == other.connectionWidth &&
+        useCustomCurve == other.useCustomCurve &&
+        _listEquals(defaultNodeColors, other.defaultNodeColors) &&
+        rootNodeSize == other.rootNodeSize &&
+        primaryNodeSize == other.primaryNodeSize &&
+        leafNodeSize == other.leafNodeSize &&
+        selectionBorderColor == other.selectionBorderColor &&
+        selectionBorderWidth == other.selectionBorderWidth &&
+        selectedColor == other.selectedColor &&
+        animationDuration == other.animationDuration &&
+        animationCurve == other.animationCurve &&
+        enableNodeShadow == other.enableNodeShadow &&
+        nodeShadowColor == other.nodeShadowColor &&
+        nodeShadowBlurRadius == other.nodeShadowBlurRadius &&
+        nodeShadowSpreadRadius == other.nodeShadowSpreadRadius &&
+        nodeShadowOffset == other.nodeShadowOffset &&
+        enableAutoSizing == other.enableAutoSizing &&
+        minNodeWidth == other.minNodeWidth &&
+        maxNodeWidth == other.maxNodeWidth &&
+        minNodeHeight == other.minNodeHeight &&
+        textPadding == other.textPadding &&
+        maxCustomNodeWidth == other.maxCustomNodeWidth &&
+        maxCustomNodeHeight == other.maxCustomNodeHeight &&
+        minCustomNodeWidth == other.minCustomNodeWidth &&
+        minCustomNodeHeight == other.minCustomNodeHeight &&
+        enableCustomNodeAutoSizing == other.enableCustomNodeAutoSizing &&
+        nodeBuilder == other.nodeBuilder;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+          mindMapType,
+          layout,
+          nodeShape,
+          backgroundColor,
+          levelSpacing,
+          nodeMargin,
+          connectionColor,
+          connectionWidth,
+          useCustomCurve,
+          Object.hashAll(defaultNodeColors),
+          rootNodeSize,
+          primaryNodeSize,
+          leafNodeSize,
+          selectionBorderColor,
+          selectionBorderWidth,
+          selectedColor,
+          animationDuration,
+          animationCurve,
+          enableNodeShadow,
+          nodeShadowColor,
+        ) ^
+        Object.hash(
+          nodeShadowBlurRadius,
+          nodeShadowSpreadRadius,
+          nodeShadowOffset,
+          enableAutoSizing,
+          minNodeWidth,
+          maxNodeWidth,
+          minNodeHeight,
+          textPadding,
+          maxCustomNodeWidth,
+          maxCustomNodeHeight,
+          minCustomNodeWidth,
+          minCustomNodeHeight,
+          enableCustomNodeAutoSizing,
+          nodeBuilder,
+        );
+  }
+
+  /// Helper method to compare lists
+  bool _listEquals<T>(List<T> a, List<T> b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
 }

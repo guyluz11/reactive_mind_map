@@ -89,6 +89,13 @@ class MindMapWidget extends StatefulWidget {
   /// Controller for programmatic control
   final MindMapController? controller;
 
+  /// Whether to enable node collapsing/expanding on tap (default: true)
+  final bool enableNodeCollapsing;
+
+  /// Whether to enable node tap interactions (default: true)
+  /// If false, the node will not respond to taps, allowing child widgets to handle them.
+  final bool enableNodeTap;
+
   const MindMapWidget({
     super.key,
     required this.data,
@@ -113,6 +120,8 @@ class MindMapWidget extends StatefulWidget {
     this.autoCenterOnScreen = false,
     this.focusZoomOutFactor = 1.0,
     this.controller,
+    this.enableNodeCollapsing = true,
+    this.enableNodeTap = true,
   });
 
   @override
@@ -1884,6 +1893,71 @@ class MindMapWidgetState extends State<MindMapWidget>
     final borderWidth =
         (isFocused || isSelected) ? widget.style.selectionBorderWidth : 2.0;
 
+    Widget nodeContent = Container(
+      constraints:
+          widget.style.enableAutoSizing
+              ? BoxConstraints(
+                minWidth: widget.style.minNodeWidth,
+                minHeight: widget.style.minNodeHeight,
+                // No max constraints when auto-sizing to allow content to determine size
+              )
+              : BoxConstraints(
+                minWidth: widget.style.minNodeWidth,
+                minHeight: widget.style.minNodeHeight,
+                maxWidth: widget.style.maxNodeWidth,
+              ),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: ShapeDecoration(
+          color: nodeColor,
+          shape: _getShapeBorder(
+            widget.style.nodeShape,
+            borderColor,
+            borderWidth,
+          ),
+          shadows:
+              widget.style.enableNodeShadow
+                  ? [
+                    BoxShadow(
+                      color: widget.style.nodeShadowColor,
+                      blurRadius: widget.style.nodeShadowBlurRadius,
+                      spreadRadius: widget.style.nodeShadowSpreadRadius,
+                      offset: widget.style.nodeShadowOffset,
+                    ),
+                  ]
+                  : null,
+        ),
+        child: node.content,
+      ),
+    );
+
+    if (widget.enableNodeTap) {
+      nodeContent = GestureDetector(
+        onTap: () {
+          // Always select the node (triggers onNodeTap)
+          _selectNode(node);
+
+          // Only toggle if enabled and has children
+          if (widget.enableNodeCollapsing && node.hasChildren) {
+            toggleNode(node);
+          }
+        },
+        onLongPress: () {
+          final originalData = _findOriginalData(node.id);
+          if (originalData != null) {
+            widget.onNodeLongPress?.call(originalData);
+          }
+        },
+        onDoubleTap: () {
+          final originalData = _findOriginalData(node.id);
+          if (originalData != null) {
+            widget.onNodeDoubleTap?.call(originalData);
+          }
+        },
+        child: nodeContent,
+      );
+    }
+
     return Positioned(
       key: ValueKey('positioned_${node.id}'),
       left: constrainedLeft,
@@ -1900,64 +1974,7 @@ class MindMapWidgetState extends State<MindMapWidget>
             });
           }
         },
-        child: GestureDetector(
-          onTap: () {
-            if (node.hasChildren) {
-              toggleNode(node);
-            } else {
-              _selectNode(node);
-            }
-          },
-          onLongPress: () {
-            final originalData = _findOriginalData(node.id);
-            if (originalData != null) {
-              widget.onNodeLongPress?.call(originalData);
-            }
-          },
-          onDoubleTap: () {
-            final originalData = _findOriginalData(node.id);
-            if (originalData != null) {
-              widget.onNodeDoubleTap?.call(originalData);
-            }
-          },
-          child: Container(
-            constraints:
-                widget.style.enableAutoSizing
-                    ? BoxConstraints(
-                      minWidth: widget.style.minNodeWidth,
-                      minHeight: widget.style.minNodeHeight,
-                      // No max constraints when auto-sizing to allow content to determine size
-                    )
-                    : BoxConstraints(
-                      minWidth: widget.style.minNodeWidth,
-                      minHeight: widget.style.minNodeHeight,
-                      maxWidth: widget.style.maxNodeWidth,
-                    ),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              decoration: ShapeDecoration(
-                color: nodeColor,
-                shape: _getShapeBorder(
-                  widget.style.nodeShape,
-                  borderColor,
-                  borderWidth,
-                ),
-                shadows:
-                    widget.style.enableNodeShadow
-                        ? [
-                          BoxShadow(
-                            color: widget.style.nodeShadowColor,
-                            blurRadius: widget.style.nodeShadowBlurRadius,
-                            spreadRadius: widget.style.nodeShadowSpreadRadius,
-                            offset: widget.style.nodeShadowOffset,
-                          ),
-                        ]
-                        : null,
-              ),
-              child: node.content,
-            ),
-          ),
-        ),
+        child: nodeContent,
       ),
     );
   }

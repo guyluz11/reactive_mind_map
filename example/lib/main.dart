@@ -29,6 +29,8 @@ class _TestScreenState extends State<TestScreen> {
   final MindMapController _controller = MindMapController();
   String lastAction = 'Start';
   NodeExpandCameraBehavior expandBehavior = NodeExpandCameraBehavior.none;
+  bool enableNodeCollapsing = true;
+  bool enableNodeTap = true;
 
   // Simple test data
   late MindMapData mindMapData;
@@ -59,7 +61,21 @@ class _TestScreenState extends State<TestScreen> {
             MindMapData(id: 'sub2', content: Text('das')),
           ],
         ),
-        MindMapData(id: 'node2', content: const Text('🎨 Node 2')),
+        MindMapData(
+          id: 'node2',
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('🎨 Node 2'),
+              ElevatedButton(
+                onPressed: () {
+                  debugPrint('🔘 Button in Node 2 pressed!');
+                },
+                child: const Text('Click Me'),
+              ),
+            ],
+          ),
+        ),
         MindMapData(id: 'node3', content: const Text('🔧 Node 3')),
         MindMapData(
           id: 'node4',
@@ -134,6 +150,25 @@ class _TestScreenState extends State<TestScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 8),
+                SwitchListTile(
+                  title: const Text('Enable Node Collapsing'),
+                  value: enableNodeCollapsing,
+                  onChanged: (value) {
+                    setState(() {
+                      enableNodeCollapsing = value;
+                    });
+                  },
+                ),
+                SwitchListTile(
+                  title: const Text('Enable Node Tap'),
+                  value: enableNodeTap,
+                  onChanged: (value) {
+                    setState(() {
+                      enableNodeTap = value;
+                    });
+                  },
+                ),
               ],
             ),
           ),
@@ -165,6 +200,8 @@ class _TestScreenState extends State<TestScreen> {
                   centerOffset: const Offset(0, 0),
                   autoCenterOnScreen: true,
                   debugMode: false,
+                  enableNodeCollapsing: enableNodeCollapsing,
+                  enableNodeTap: enableNodeTap,
                 ),
               ),
             ),
